@@ -1,0 +1,6 @@
+framework module IVSDK {
+  umbrella header "IVSDK.h"
+  export *
+
+  module * { export * }
+}
