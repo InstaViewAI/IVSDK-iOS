@@ -10,27 +10,27 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		M6QigvPzbyzhwD63p/frvyCXLk8=
+		dwxZl141muhLGRQqTIF1jU4LhJ8=
 		</data>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.abi.json</key>
 		<data>
-		j0gDNi7YvIq2Ux4FvZnkUNCSuN4=
+		+QzfkWJ54QOGbt8uJ5yGepFul3Y=
 		</data>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<data>
-		xWauJiESl41VH17FtN69HDTWGVc=
+		Y3xQVg4nOHvvpjzJpwSoOuryC9U=
 		</data>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<data>
-		Ig2CBY3/wQvoMlg7Kdck5QIbd8w=
+		/LeL8VEScm3kwyQty6fgbfNT8xc=
 		</data>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<data>
-		xWauJiESl41VH17FtN69HDTWGVc=
+		Y3xQVg4nOHvvpjzJpwSoOuryC9U=
 		</data>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		Vqtff26sopJi6/ZSqihllFadMUQ=
+		abHBXv+jQ8xH0rnuMavZFdUQWgk=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -50,35 +50,35 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			LVSPC51T2dO39v3PzJPWEYcklssco3pc/gRPocbAERw=
+			ZtqAUE9ARn4I83135o6YK6j0jixtuJaXtWUAMKIue8w=
 			</data>
 		</dict>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			8qRS2YkeF9avidp6EwwKZ964562EZ4zZsUdia+8qh8w=
+			lRw/g2LwJ7GEQ1ChTn5DFjQ5v+sJ8kzKpjWZAD/Ma7c=
 			</data>
 		</dict>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			GHjRk59leFdqss8D6Qfn4Ft0gPKkWbIhOWzJ5hE91OA=
+			P2ovbovs+OIB+8sUzNEYB4RovzbvXpZckoQm9OKxo2c=
 			</data>
 		</dict>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			8qRS2YkeF9avidp6EwwKZ964562EZ4zZsUdia+8qh8w=
+			lRw/g2LwJ7GEQ1ChTn5DFjQ5v+sJ8kzKpjWZAD/Ma7c=
 			</data>
 		</dict>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			7m8hNMkEYN0eWG8kspETXbfdtU5g7R4u8jwE3y4/mfA=
+			KkRItjhsVsukDsIbHvr2r4jd7er7q6eesh31ldjRl1Y=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

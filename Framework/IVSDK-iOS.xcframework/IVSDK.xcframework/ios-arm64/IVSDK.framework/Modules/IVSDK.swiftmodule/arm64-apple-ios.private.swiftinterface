@@ -1,6 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 6.0.3 effective-5.10 (swiftlang-6.0.3.1.10 clang-1600.0.30.1)
-// swift-module-flags: -target arm64-apple-ios15.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-bare-slash-regex -module-name IVSDK
+// swift-compiler-version: Apple Swift version 6.1.2 effective-5.10 (swiftlang-6.1.2.1.2 clang-1700.0.13.5)
+// swift-module-flags: -target arm64-apple-ios15.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name IVSDK
+// swift-module-flags-ignorable:  -interface-compiler-version 6.1.2
 import AVFoundation
 import AVKit
 import AudioToolbox
@@ -23,531 +24,27 @@ import UIKit
 import _Concurrency
 import _StringProcessing
 import _SwiftConcurrencyShims
-@_hasMissingDesignatedInitializers public class Event {
-  public class func parseEvent(event: Swift.String) -> IVSDK.Message?
-  @objc deinit
+public protocol ProMonitoringServiceContract {
+  func getProfile(spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.ProMonitoringModel>
+  func createProfile(spaceId: Swift.String, request: IVSDK.ProMonitoringRequest) -> IVSDK.IVPublisher<Swift.Void>
+  func setupProfile(spaceId: Swift.String, request: IVSDK.ProMonitoringRequest) -> IVSDK.IVPublisher<IVSDK.ProMonitoringModel>
+  func updateProfile(spaceId: Swift.String, request: IVSDK.ProMonitoringRequest) -> IVSDK.IVPublisher<IVSDK.ProMonitoringModel>
+  func updateDevices(spaceId: Swift.String, request: IVSDK.SubscribeDeviceRequest) -> IVSDK.IVPublisher<[IVSDK.ProMonitoringDeviceIDModel]>
+  func armSystem(spaceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
+  func disarmSystem(spaceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
+  func acknowledgeAlarm(spaceId: Swift.String, eventId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
+  func getLiveAlarm(spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.LiveAlarmModel>
+  func getDevices(spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.ProMonitoringModel>
+  func sendOtp(request: IVSDK.PhoneNumber) -> IVSDK.IVPublisher<Swift.Void>
+  func enableTestMode(spaceId: Swift.String, request: IVSDK.ProMonitoringTestModeRequest) -> IVSDK.IVPublisher<IVSDK.ProMonitoringTestModeModel>
+  func dismissEvent(spaceId: Swift.String, request: IVSDK.ProMonitoringAcknowledgementRequest) -> IVSDK.IVPublisher<Swift.Void>
+  func securityLogs(spaceId: Swift.String, queryItems: [IVSDK.QueryItem], sortItem: IVSDK.SortItem?) -> IVSDK.IVPublisher<IVSDK.ListDataModel<IVSDK.SecurityLogsModel>>
+  func updateInviteePhoneNumber(spaceId: Swift.String, request: IVSDK.RespondingPartyPhoneNumberRequest) -> IVSDK.IVPublisher<Swift.Void>
 }
-extension Swift.String {
-  public func base64Decoded() -> Swift.String?
-}
-public class Message : Swift.Codable {
-  public init(_ action: Swift.String, _ senderClientId: Swift.String, _ messagePayload: Swift.String)
-  public init(_ action: Swift.String, _ recipientClientId: Swift.String, _ senderClientId: Swift.String, _ messagePayload: Swift.String)
-  public func getAction() -> Swift.String
-  public func setAction(action: Swift.String)
-  public func getRecipientClientId() -> Swift.String
-  public func setRecipientClientId(recipientClientId: Swift.String)
-  public func getSenderClientId() -> Swift.String
-  public func setSenderClientId(senderClientId: Swift.String)
-  public func getMessagePayload() -> Swift.String
-  public func setMessagePayload(messagePayload: Swift.String)
-  public class func createAnswerMessage(sdp: Swift.String, _ recipientClientId: Swift.String) -> IVSDK.Message
-  public class func createOfferMessage(sdp: Swift.String, senderClientId: Swift.String, playbackTime: Foundation.TimeInterval?, playbackEndTime: Foundation.TimeInterval?) -> IVSDK.Message
-  @objc deinit
-  public func encode(to encoder: any Swift.Encoder) throws
-  required public init(from decoder: any Swift.Decoder) throws
-}
-public struct PlaybackMediaInfo : Swift.Codable {
-  public var start: Swift.Int64
-  public var end: Swift.Int64
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct PlaybackMessage : Swift.Codable, Swift.Equatable {
-  public var senderClientId: Swift.String
-  public var type: Swift.String
-  public var action: IVSDK.PlaybackAction
-  public var time: Swift.Int64?
-  public var startTime: Swift.Int64?
-  public var endTime: Swift.Int64?
-  public var list: [IVSDK.PlaybackMediaInfo]?
-  public var timeStamp: Swift.Int64?
-  public var version: Swift.String?
-  public init(action: IVSDK.PlaybackAction, time: Swift.Int64? = nil, startTime: Swift.Int64? = nil, endTime: Swift.Int64? = nil)
-  public func supportTimeline() -> Swift.Bool
-  public static func == (lhs: IVSDK.PlaybackMessage, rhs: IVSDK.PlaybackMessage) -> Swift.Bool
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public enum PlaybackAction : Swift.String, Swift.Codable {
-  case seek
-  case play
-  case pause
-  case mediaInfo
-  case tsTimeStamp
-  case mediaInfoStartTime
-  case playing
-  case pausing
-  case seeking
-  case playbackEnd
-  public init?(rawValue: Swift.String)
-  public typealias RawValue = Swift.String
-  public var rawValue: Swift.String {
-    get
-  }
-}
-public protocol ConnectionStatusDelegate : AnyObject {
-  func streamStarted()
-  func streamEnded()
-  func streamConnecting()
-  func streamFailed()
-  func signalClientDidConnect()
-  func remoteStreamAdded()
-  func dataChannelMessage(_ message: Foundation.Data)
-  func dataChannelOpen(_ open: Swift.Bool)
-}
-@objc public class ConnectionManager : ObjectiveC.NSObject {
-  weak public var connectionStatedelegate: (any IVSDK.ConnectionStatusDelegate)?
-  public var hasRemoteAudio: Swift.Bool {
-    get
-  }
-  public var hasLocalAudio: Swift.Bool {
-    get
-  }
-  public init(credential: IVSDK.ConnectionCred, isPlayback: Swift.Bool)
-  @objc deinit
-}
-extension IVSDK.ConnectionManager {
-  public func startWebRTCConnectionWithIce(deviceId: Swift.String, otherSessionHasAudio: Swift.Bool, completion: @escaping ((any Swift.Error)?) -> Swift.Void)
-}
-extension IVSDK.ConnectionManager {
-  public func startCaptureLocalVideo(view: IVSDK.IVVideoView)
-  public func removeLocalVideo(view: IVSDK.IVVideoView)
-  public func renderRemoteVideo(view: IVSDK.IVVideoView)
-  public func removeRemoteVideo(view: IVSDK.IVVideoView)
-  public func sendOffer(playbackTime: Foundation.TimeInterval?, playbackEndTime: Foundation.TimeInterval?)
-  public func disconnectWebRTC()
-  public func enableRemoteAudio(enable: Swift.Bool, otherSessionHasAudio: Swift.Bool)
-  public func enableLocalAudio(enable: Swift.Bool, otherSessionHasAudio: Swift.Bool)
-  public func sendPlaybackMessage(message: IVSDK.PlaybackMessage)
-}
-public enum ConnectionState {
-  case none
-  case initiated
-  case connected
-  case failed
-  public static func == (a: IVSDK.ConnectionState, b: IVSDK.ConnectionState) -> Swift.Bool
-  public func hash(into hasher: inout Swift.Hasher)
-  public var hashValue: Swift.Int {
-    get
-  }
-}
-final public class LiveViewModel : Combine.ObservableObject, IVSDK.ConnectionStatusDelegate {
-  @Combine.Published @_projectedValueProperty($isConnected) final public var isConnected: Swift.Bool {
-    get
-    @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
-    set
-    @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
-    _modify
-  }
-  final public var $isConnected: Combine.Published<Swift.Bool>.Publisher {
-    get
-    @available(iOS 14.0, tvOS 14.0, watchOS 7.0, macOS 11.0, *)
-    set
-  }
-  final public var onConnected: (() -> Swift.Void)?
-  final public var onError: (() -> Swift.Void)?
-  final public var onReconnect: (() -> Swift.Void)?
-  final public var onTimeout: (() -> Swift.Void)?
-  final public var onDataChannelMessage: ((Foundation.Data) -> Swift.Void)?
-  final public var onDataChannelOpen: ((Swift.Bool) -> Swift.Void)?
-  final public var connectionState: IVSDK.ConnectionState
-  final public var retryCount: Swift.Int
-  final public var isRecordingLiveView: Swift.Bool
-  final public var remoteView: IVSDK.VideoView
-  final public var isPlayback: Swift.Bool
-  final public var sdCardPlaybackEnd: Swift.Bool
-  final public var playbackCurrentTime: Swift.Double
-  public init(spaceId: Swift.String, deviceId: Swift.String, batteryCamera: Swift.Bool, spaceService: any IVSDK.SpaceServiceContract, deviceService: any IVSDK.DeviceServiceContract, isPlayback: Swift.Bool = false)
-  final public func remoteStreamAdded()
-  final public func signalClientDidConnect()
-  final public func streamStarted()
-  final public func streamEnded()
-  final public func streamConnecting()
-  final public func streamFailed()
-  final public func dataChannelMessage(_ message: Foundation.Data)
-  final public func dataChannelOpen(_ open: Swift.Bool)
-  final public func seekToTime(time: Foundation.TimeInterval)
-  final public func play()
-  final public func pause()
-  final public func mediaInfo(startTime: Foundation.TimeInterval, endTime: Foundation.TimeInterval)
-  final public func mediaInfoStartTime()
-  final public func connect(localView: IVSDK.IVVideoView? = nil)
-  final public func disconnect(localView: IVSDK.IVVideoView? = nil)
-  final public func enableAudio(value: Swift.Bool)
-  final public func enableMic(value: Swift.Bool)
-  final public func terminateConnection(privacyEnable: Swift.Bool)
-  final public func startRecording(size: CoreFoundation.CGSize?)
-  final public func stopRecording(completion: @escaping (_ recordingUrl: Foundation.URL?) -> Swift.Void)
-  final public func captureSnapshot(size: CoreFoundation.CGSize?, snapshot: @escaping (UIKit.UIImage?) -> ())
-  final public func getLastHourBegininig(date: Foundation.Date) -> Foundation.TimeInterval
-  public typealias ObjectWillChangePublisher = Combine.ObservableObjectPublisher
-  @objc deinit
-}
-public struct LiveViewObjectStore {
-  public static func objectFor(spaceId: Swift.String, deviceId: Swift.String, batteryCamera: Swift.Bool, isPlayback: Swift.Bool = false) -> IVSDK.LiveViewModel
-  public static func terminateConnectionForDevice(spaceId: Swift.String, deviceId: Swift.String, privacyEnable: Swift.Bool, deleteCamera: Swift.Bool = false)
-  public static func logout()
-  public static func disconnectOnAppTermination()
-}
-@_Concurrency.MainActor @preconcurrency public struct VideoView : SwiftUI.UIViewRepresentable {
-  @_Concurrency.MainActor @preconcurrency public let remoteView: IVSDK.IVVideoView
-  @_Concurrency.MainActor @preconcurrency public func updateUIView(_ uiView: IVSDK.IVVideoView, context: IVSDK.VideoView.Context)
-  @_Concurrency.MainActor @preconcurrency public func makeUIView(context: IVSDK.VideoView.Context) -> IVSDK.IVVideoView
-  @_Concurrency.MainActor @preconcurrency public func captureSnapshot() -> UIKit.UIImage
-  @_Concurrency.MainActor @preconcurrency public func makeCoordinator() -> IVSDK.VideoView.Coordinator
-  @objc @_hasMissingDesignatedInitializers public class Coordinator : ObjectiveC.NSObject {
-    @objc deinit
-  }
-  public typealias Body = Swift.Never
-  public typealias UIViewType = IVSDK.IVVideoView
-}
-public typealias IVPublisher<T> = Combine.AnyPublisher<IVSDK.ResourceState<T>, Swift.Never>
-public struct Empty : Swift.Decodable {
-  public static func emptyValue() -> IVSDK.Empty
-  public init(from decoder: any Swift.Decoder) throws
-}
-public enum ResourceState<T> {
-  case loading
-  case success(data: T)
-  case error(error: any Swift.Error)
-  public var isLoading: Swift.Bool {
-    get
-  }
-  public var error: (any Swift.Error)? {
-    get
-  }
-  public var isError: Swift.Bool {
-    get
-  }
-  public var data: T? {
-    get
-  }
-}
-extension IVSDK.ResourceState {
-  public func changeType<X>(handler: (_ data: T) -> IVSDK.IVPublisher<X>) -> IVSDK.IVPublisher<X>
-}
-extension Combine.Publisher {
-  public func asResult() -> Combine.AnyPublisher<Swift.Result<Self.Output, Self.Failure>, Swift.Never>
-}
-extension Combine.AnyPublisher where Output == IVSDK.ResourceState<IVSDK.Empty> {
-  public func mapEmpty() -> IVSDK.IVPublisher<Swift.Void>
-}
-public struct CreateSpaceRequest : Swift.Codable {
-  public var name: Swift.String
-  public var address: IVSDK.AddressModel
-  public init(name: Swift.String, address: IVSDK.AddressModel)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct SpaceInvitaionRequest : Swift.Codable {
-  public var action: IVSDK.InvitationResponse
-  public var phoneNumber: IVSDK.PhoneNumber?
-  public init(action: IVSDK.InvitationResponse, phoneNumber: IVSDK.PhoneNumber? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct SpaceShareUserInviteRequest : Swift.Codable {
-  public var deviceIds: [Swift.String]
-  public var inviteeEmail: Swift.String?
-  public var role: IVSDK.SpaceRoleType?
-  public var isSecurity: Swift.Bool?
-  public init(deviceIds: [Swift.String], inviteeEmail: Swift.String? = nil, role: IVSDK.SpaceRoleType? = nil, isSecurity: Swift.Bool? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct DeleteEventsResquest : Swift.Codable {
-  public var eventId: [Swift.String]
-  public init(eventId: [Swift.String])
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct UpdateFaceNameRequest : Swift.Codable {
-  public var name: Swift.String?
-  public var status: Swift.String?
-  public var thumbnailName: Swift.String?
-  public init(name: Swift.String? = nil, status: Swift.String? = nil, thumbnailName: Swift.String? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct UpdateSpaceFeatureRequest : Swift.Codable {
-  public var faceRecognition: Swift.Bool
-  public init(faceRecognition: Swift.Bool)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct PairingSessionKeyRequest : Swift.Codable {
-  public var timezoneSettings: IVSDK.TimezoneSettings
-  public init(timezoneSettings: IVSDK.TimezoneSettings)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct TimezoneSettings : Swift.Codable, Swift.Equatable {
-  public var id: Swift.String
-  public var tzFormat: Swift.String
-  public init(id: Swift.String, tzFormat: Swift.String)
-  public static func == (lhs: IVSDK.TimezoneSettings, rhs: IVSDK.TimezoneSettings) -> Swift.Bool
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct ProMonitoringRequest : Swift.Codable {
-  public var address: IVSDK.ProMonitoringAddressModel?
-  public var timezone: Swift.String?
-  public var licenseExpirationDate: Swift.String?
-  public var licenseNumber: Swift.String?
-  public var phoneNumber: IVSDK.PhoneNumber?
-  public var safeword: Swift.String?
-  public var setupStep: Swift.String?
-  public var testMode: Swift.Bool?
-  public var dismissalWindow: Swift.Int?
-  public var exitDelay: Swift.Int?
-  public init(address: IVSDK.ProMonitoringAddressModel? = nil, timezone: Swift.String? = nil, licenseExpirationDate: Swift.String? = nil, licenseNumber: Swift.String? = nil, phoneNumber: IVSDK.PhoneNumber? = nil, safeword: Swift.String? = nil, setupStep: Swift.String? = nil, testMode: Swift.Bool? = nil, dismissalWindow: Swift.Int? = nil, exitDelay: Swift.Int? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct ProMonitoringTestModeRequest : Swift.Codable {
-  public var enable: Swift.Bool
-  public init(enable: Swift.Bool)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct ProMonitoringAcknowledgementRequest : Swift.Codable {
-  public var state: Swift.String
-  public init(state: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct RespondingPartyPhoneNumberRequest : Swift.Codable {
-  public var code: Swift.String
-  public var number: Swift.String
-  public var otp: Swift.String?
-  public init(code: Swift.String, number: Swift.String, otp: Swift.String? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct SignupRequest : Swift.Codable {
-  public var name: IVSDK.UserName
-  public var email: Swift.String
-  public var country: Swift.String
-  public var phoneNumber: IVSDK.PhoneNumber
+public struct WifiDetails : Swift.Codable {
+  public var ssid: Swift.String
   public var password: Swift.String
-  public var language: Swift.String
-  public init(name: IVSDK.UserName, email: Swift.String, country: Swift.String, phoneNumber: IVSDK.PhoneNumber, password: Swift.String, language: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct SubscribeDeviceRequest : Swift.Codable {
-  public var deviceIds: [Swift.String]
-  public init(deviceIds: [Swift.String])
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct UpdateDeviceRequest : Swift.Codable {
-  public var location: Swift.String?
-  public var name: Swift.String?
-  public var pairingStatus: Swift.String?
-  public init(location: Swift.String? = nil, name: Swift.String? = nil, pairingStatus: Swift.String? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct UpdateDeviceSettingRequestModel : Swift.Codable {
-  public var id: Swift.String?
-  public var eventSchedulingSettings: IVSDK.EventSchedulingSettingsRequest?
-  public var sensitivityLevel: Swift.String?
-  public var rotationAngle: Swift.Int?
-  public var audioSettings: IVSDK.AudioSettingsRequest?
-  public var fwVersion: Swift.String?
-  public var privacyMode: Swift.Bool?
-  public var eventDetectionSettings: IVSDK.EventDetectionSettingsRequest?
-  public var nightVisionSettings: IVSDK.NightVisionSettingsRequest?
-  public var notificationSettings: IVSDK.NotificationSettingsRequest?
-  public var eventSchedulingEnabled: Swift.Bool?
-  public var motionZonesEnabled: Swift.Bool?
-  public var osdSettings: IVSDK.OsdSettingsRequest?
-  public var motionZone: IVSDK.MotionZoneRequest?
-  public var statusLightEnabled: Swift.Bool?
-  public var ltMode: Swift.String?
-  public var humanTracking: Swift.Bool?
-  public var sdCardSettings: IVSDK.SDCardRequest?
-  public var timezoneSettings: IVSDK.TimezoneSettings?
-  public var hdrEnabled: Swift.Bool?
-  public var eventDuration: Swift.Int?
-  public var alwaysOn: Swift.Bool?
-  public var pirSensitivityLevel: Swift.String?
-  public init(id: Swift.String? = nil, eventSchedulingSettings: IVSDK.EventSchedulingSettingsRequest? = nil, sensitivityLevel: Swift.String? = nil, rotationAngle: Swift.Int? = nil, audioSettings: IVSDK.AudioSettingsRequest? = nil, fwVersion: Swift.String? = nil, privacyMode: Swift.Bool? = nil, eventDetectionSettings: IVSDK.EventDetectionSettingsRequest? = nil, nightVisionSettings: IVSDK.NightVisionSettingsRequest? = nil, notificationSettings: IVSDK.NotificationSettingsRequest? = nil, eventSchedulingEnabled: Swift.Bool? = nil, motionZonesEnabled: Swift.Bool? = nil, osdSettings: IVSDK.OsdSettingsRequest? = nil, motionZone: IVSDK.MotionZoneRequest? = nil, statusLightEnabled: Swift.Bool? = nil, ltMode: Swift.String? = nil, humanTracking: Swift.Bool? = nil, sdCardSettings: IVSDK.SDCardRequest? = nil, timezoneSettings: IVSDK.TimezoneSettings? = nil, hdrEnabled: Swift.Bool? = nil, eventDuration: Swift.Int? = nil, alwaysOn: Swift.Bool? = nil, pirSensitivityLevel: Swift.String? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct UpdateDeviceLightSettingRequestModel : Swift.Codable {
-  public var light: Swift.Bool?
-  public init(light: Swift.Bool? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct EventSchedulingSettingsRequest : Swift.Codable {
-  public var endTime: IVSDK.EventSchedulingTime?
-  public var startTime: IVSDK.EventSchedulingTime?
-  public init(endTime: IVSDK.EventSchedulingTime? = nil, startTime: IVSDK.EventSchedulingTime? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct AudioSettingsRequest : Swift.Codable {
-  public var microphoneEnabled: Swift.Bool?
-  public var volumeLevel: Swift.Double?
-  public var speakerEnabled: Swift.Bool?
-  public init(microphoneEnabled: Swift.Bool? = nil, volumeLevel: Swift.Double? = nil, speakerEnabled: Swift.Bool? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct EventDetectionSettingsRequest : Swift.Codable {
-  public var motion: Swift.Bool?
-  public var person: Swift.Bool?
-  public var vehicle: Swift.Bool?
-  public var animal: Swift.Bool?
-  public var coolDown: Swift.String?
-  public init(motion: Swift.Bool? = nil, person: Swift.Bool? = nil, vehicle: Swift.Bool? = nil, animal: Swift.Bool? = nil, coolDown: Swift.String? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct NightVisionSettingsRequest : Swift.Codable {
-  public var mode: Swift.String?
-  public init(mode: Swift.String? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct NotificationSettingsRequest : Swift.Codable, Swift.Equatable {
-  public var mute: Swift.Bool?
-  public var doorbellMute: Swift.Bool?
-  public init(mute: Swift.Bool? = nil, doorbellMute: Swift.Bool? = nil)
-  public static func == (a: IVSDK.NotificationSettingsRequest, b: IVSDK.NotificationSettingsRequest) -> Swift.Bool
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct OsdSettingsRequest : Swift.Codable {
-  public var instaviewLogo: Swift.Bool?
-  public var timeStamp: Swift.Bool?
-  public init(instaviewLogo: Swift.Bool? = nil, timeStamp: Swift.Bool? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct MotionZoneRequest : Swift.Codable {
-  public var type: Swift.String?
-  public var zones: [IVSDK.ActivityZones]?
-  public init(type: Swift.String? = nil, zones: [IVSDK.ActivityZones]? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct FirmwareUpdateRequest : Swift.Codable {
-  public var fwVersion: Swift.String
-  public init(fwVersion: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct MovePtzRequest : Swift.Codable {
-  public var pan: Swift.Int
-  public var tilt: Swift.Int
-  public var nonStop: Swift.Bool
-  public init(pan: Swift.Int, tilt: Swift.Int, nonStop: Swift.Bool)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct SDCardRequest : Swift.Codable {
-  public var cvrEnabled: Swift.Bool?
-  public init(cvrEnabled: Swift.Bool? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct UpdateUserRequest : Swift.Codable {
-  public var name: IVSDK.UserName?
-  public var country: Swift.String?
-  public var phoneNumber: IVSDK.PhoneNumber?
-  public var accountSettings: IVSDK.AccountSettings?
-  public var language: Swift.String?
-  public init(name: IVSDK.UserName? = nil, country: Swift.String? = nil, phoneNumber: IVSDK.PhoneNumber? = nil, accountSettings: IVSDK.AccountSettings? = nil, language: Swift.String? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct AccountSettings : Swift.Codable {
-  public var helpDetectionAccuracyEnabled: Swift.Bool?
-  public var promotionalEmailEnabled: Swift.Bool?
-  public init(helpDetectionAccuracyEnabled: Swift.Bool? = nil, promotionalEmailEnabled: Swift.Bool? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct UpdateAPNSTokenRequest : Swift.Codable {
-  public var token: Swift.String?
-  public var appId: Swift.String?
-  public var provider: Swift.String?
-  public init(token: Swift.String? = nil, appId: Swift.String? = nil, provider: Swift.String? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct AppStoreVersionResultModel : Swift.Codable {
-  public var results: [IVSDK.AppStoreVersionModel]
-  public init(versions: [IVSDK.AppStoreVersionModel])
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct AppStoreVersionModel : Swift.Codable {
-  public var version: Swift.String
-  public init(version: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct B2AuthTokenModel : Swift.Codable {
-  public var authToken: Swift.String
-  public var bucketName: Swift.String
-  public var deviceId: Swift.String
-  public init(authToken: Swift.String, bucketName: Swift.String, deviceId: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public enum ChannelProtocol : Swift.String, Swift.Codable {
-  case https
-  case wss
-  public init?(rawValue: Swift.String)
-  public typealias RawValue = Swift.String
-  public var rawValue: Swift.String {
-    get
-  }
-}
-public struct ChannelInfo : Swift.Codable {
-  public struct Endpoint : Swift.Codable {
-    public var endpoint: Swift.String
-    public var `protocol`: IVSDK.ChannelProtocol
-    public func encode(to encoder: any Swift.Encoder) throws
-    public init(from decoder: any Swift.Decoder) throws
-  }
-  public var deviceId: Swift.String
-  public var channelArn: Swift.String
-  public var endpoints: [IVSDK.ChannelInfo.Endpoint]
-  public var iceConfig: [IVSDK.IceConfig]
-  public init(deviceId: Swift.String, channelArn: Swift.String, endpoints: [IVSDK.ChannelInfo.Endpoint], iceConfig: [IVSDK.IceConfig])
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct ConnectionCred : Swift.Codable {
-  public var region: Swift.String
-  public var accessKeyId: Swift.String
-  public var secretAccessKey: Swift.String
-  public var sessionToken: Swift.String
-  public var channelInfo: [IVSDK.ChannelInfo]
-  public init(region: Swift.String, accessKey: Swift.String, secretKey: Swift.String, sessionToken: Swift.String, channelInfo: [IVSDK.ChannelInfo])
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct IceConfig : Swift.Codable {
-  public var username: Swift.String
-  public var password: Swift.String
-  public var ttl: Swift.Int
-  public var uris: [Swift.String]
-  public init(userName: Swift.String, password: Swift.String, ttl: Swift.Int, uris: [Swift.String])
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct DeletedEventsModel : Swift.Codable {
-  public var deletedEventIds: [Swift.String]
-  public init(deletedEventIds: [Swift.String])
+  public init(ssid: Swift.String, password: Swift.String)
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -570,6 +67,63 @@ public enum DeviceState : Swift.String {
   case sleep
   public init?(rawValue: Swift.String)
   public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public enum NightVisionMode : Swift.String, Swift.CaseIterable, Swift.Hashable {
+  case on
+  case off
+  case auto
+  public init?(rawValue: Swift.String)
+  public typealias AllCases = [IVSDK.NightVisionMode]
+  public typealias RawValue = Swift.String
+  nonisolated public static var allCases: [IVSDK.NightVisionMode] {
+    get
+  }
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public enum SpotLightMode : Swift.String, Swift.CaseIterable, Swift.Hashable {
+  case intelligent
+  case classicNightVision
+  case fullColor
+  case off
+  public init?(rawValue: Swift.String)
+  public typealias AllCases = [IVSDK.SpotLightMode]
+  public typealias RawValue = Swift.String
+  nonisolated public static var allCases: [IVSDK.SpotLightMode] {
+    get
+  }
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public enum GuideLightMode : Swift.String, Swift.CaseIterable, Swift.Hashable {
+  case intelligent
+  case off
+  case nightGlow
+  public init?(rawValue: Swift.String)
+  public typealias AllCases = [IVSDK.GuideLightMode]
+  public typealias RawValue = Swift.String
+  nonisolated public static var allCases: [IVSDK.GuideLightMode] {
+    get
+  }
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public enum FloodLightMode : Swift.String, Swift.CaseIterable, Swift.Hashable {
+  case intelligent
+  case fullColor
+  case off
+  public init?(rawValue: Swift.String)
+  public typealias AllCases = [IVSDK.FloodLightMode]
+  public typealias RawValue = Swift.String
+  nonisolated public static var allCases: [IVSDK.FloodLightMode] {
+    get
+  }
   public var rawValue: Swift.String {
     get
   }
@@ -607,6 +161,7 @@ public enum SDCardStatus : Swift.String, Swift.Codable {
 }
 public enum DeviceType : Swift.String, Swift.Codable {
   case nvr
+  case bird
   public init?(rawValue: Swift.String)
   public typealias RawValue = Swift.String
   public var rawValue: Swift.String {
@@ -635,21 +190,23 @@ public struct DeviceStateModel : Swift.Codable {
   public var wifiName: Swift.String
   public var ipAddr: Swift.String
   public var firmwareVersion: Swift.String
-  public var privacyMode: Swift.Bool
+  public var privacyMode: Swift.Bool?
   public var snapshotUrl: Swift.String
-  public var light: Swift.Bool
+  public var light: Swift.Bool?
   public var sdCard: IVSDK.SdCard
   public var securityArmed: Swift.Bool
   public var latestFirmwareVersion: Swift.String?
   public var forceUpdate: Swift.Bool?
   public var batteryPercentage: CoreFoundation.CGFloat?
-  public init(status: Swift.String, wifiName: Swift.String, ipAddr: Swift.String, firmwareVersion: Swift.String, privacyMode: Swift.Bool, snapshotUrl: Swift.String, light: Swift.Bool, sdCard: IVSDK.SdCard, securityArmed: Swift.Bool, batteryPercentage: CoreFoundation.CGFloat?)
+  public var charging: Swift.Bool?
+  public init(status: Swift.String, wifiName: Swift.String, ipAddr: Swift.String, firmwareVersion: Swift.String, privacyMode: Swift.Bool?, snapshotUrl: Swift.String, light: Swift.Bool?, sdCard: IVSDK.SdCard, securityArmed: Swift.Bool, batteryPercentage: CoreFoundation.CGFloat?, charging: Swift.Bool? = nil)
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
 public struct NVRCredentials : Swift.Codable {
   public var username: Swift.String
   public var password: Swift.String
+  public init(username: Swift.String, password: Swift.String)
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -657,7 +214,6 @@ public struct DeviceModel : Swift.Codable, Swift.Equatable {
   public var id: Swift.String
   public var name: Swift.String
   public var spaceId: Swift.String
-  public var location: Swift.String
   public var deviceState: IVSDK.DeviceStateModel
   public var pairingStatus: Swift.String
   public var activationDate: Swift.Int64
@@ -666,13 +222,17 @@ public struct DeviceModel : Swift.Codable, Swift.Equatable {
   public var variantName: Swift.String?
   public var nvrCredentials: IVSDK.NVRCredentials?
   public var deviceType: Swift.String?
+  public var modelProductType: Swift.String
+  public var clusterGroupVersion: Swift.String?
+  public var powerSource: Swift.String?
+  public var clusters: [IVSDK.Cluster]?
   public var displayName: Swift.String {
     get
   }
   public var displayModelName: Swift.String {
     get
   }
-  public init(id: Swift.String, name: Swift.String, spaceId: Swift.String, location: Swift.String, deviceState: IVSDK.DeviceStateModel, pairingStatus: Swift.String, activationDate: Swift.Int64, modelName: Swift.String, modelId: Swift.String, variantName: Swift.String?, nvrCredentials: IVSDK.NVRCredentials? = nil, deviceType: Swift.String? = nil)
+  public init(id: Swift.String, name: Swift.String, spaceId: Swift.String, deviceState: IVSDK.DeviceStateModel, pairingStatus: Swift.String, activationDate: Swift.Int64, modelName: Swift.String, modelId: Swift.String, variantName: Swift.String?, nvrCredentials: IVSDK.NVRCredentials? = nil, deviceType: Swift.String? = nil, modelProductType: Swift.String, clusterGroupVersion: Swift.String? = "v0", powerSource: Swift.String? = nil, clusters: [IVSDK.Cluster]? = nil)
   public static func == (lhs: IVSDK.DeviceModel, rhs: IVSDK.DeviceModel) -> Swift.Bool
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
@@ -702,7 +262,10 @@ public struct DeviceSettingModel : Swift.Codable, Swift.Equatable {
   public var eventDuration: Swift.Int?
   public var alwaysOn: Swift.Bool?
   public var pirSensitivityLevel: Swift.String?
-  public init(id: Swift.String, eventSchedulingSettings: IVSDK.EventSchedulingSettings, sensitivityLevel: Swift.String, rotationAngle: Swift.Int, audioSettings: IVSDK.AudioSettings, fwVersion: Swift.String, privacyMode: Swift.Bool, eventDetectionSettings: IVSDK.EventDetectionSettings, nightVisionSettings: IVSDK.NightVisionSettings, notificationSettings: IVSDK.NotificationSettings, eventSchedulingEnabled: Swift.Bool, motionZonesEnabled: Swift.Bool, osdSettings: IVSDK.OsdSettings, motionZone: IVSDK.MotionZone, statusLightEnabled: Swift.Bool, ltMode: Swift.String, lt: Swift.Bool, humanTracking: Swift.Bool, sdCardSettings: IVSDK.SdCardSettings, timezoneSettings: IVSDK.TimezoneSettings, hdrEnabled: Swift.Bool?, eventDuration: Swift.Int?, alwaysOn: Swift.Bool?, pirSensitivityLevel: Swift.String?)
+  public var rbLtMotion: Swift.Bool?
+  public var fldLtMode: Swift.String?
+  public var guideLampMode: Swift.String?
+  public init(id: Swift.String, eventSchedulingSettings: IVSDK.EventSchedulingSettings, sensitivityLevel: Swift.String, rotationAngle: Swift.Int, audioSettings: IVSDK.AudioSettings, fwVersion: Swift.String, privacyMode: Swift.Bool, eventDetectionSettings: IVSDK.EventDetectionSettings, nightVisionSettings: IVSDK.NightVisionSettings, notificationSettings: IVSDK.NotificationSettings, eventSchedulingEnabled: Swift.Bool, motionZonesEnabled: Swift.Bool, osdSettings: IVSDK.OsdSettings, motionZone: IVSDK.MotionZone, statusLightEnabled: Swift.Bool, ltMode: Swift.String, lt: Swift.Bool, humanTracking: Swift.Bool, sdCardSettings: IVSDK.SdCardSettings, timezoneSettings: IVSDK.TimezoneSettings, hdrEnabled: Swift.Bool?, eventDuration: Swift.Int?, alwaysOn: Swift.Bool?, pirSensitivityLevel: Swift.String?, rbLtMotion: Swift.Bool? = nil, fldLtMode: Swift.String? = nil, guideLampMode: Swift.String? = nil)
   public static func == (lhs: IVSDK.DeviceSettingModel, rhs: IVSDK.DeviceSettingModel) -> Swift.Bool
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
@@ -719,6 +282,34 @@ public struct NotificationSettings : Swift.Codable, Swift.Equatable {
   public var doorbellMute: Swift.Bool?
   public init(mute: Swift.Bool?, doorbellMute: Swift.Bool?)
   public static func == (lhs: IVSDK.NotificationSettings, rhs: IVSDK.NotificationSettings) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct TimelapseSettings : Swift.Codable, Swift.Equatable {
+  public var enabled: Swift.Bool?
+  public init(enabled: Swift.Bool?)
+  public static func == (a: IVSDK.TimelapseSettings, b: IVSDK.TimelapseSettings) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct DeviceCloudSettings : Swift.Codable, Swift.Equatable {
+  public var edgeAiDetections: IVSDK.CloudAiDetections?
+  public var cloudAiDetections: IVSDK.CloudAiDetections?
+  public var notifications: IVSDK.NotificationSettings?
+  public var timelapse: IVSDK.TimelapseSettings?
+  public init(edgeAiDetections: IVSDK.CloudAiDetections? = nil, cloudAiDetections: IVSDK.CloudAiDetections? = nil, notifications: IVSDK.NotificationSettings? = nil, timelapse: IVSDK.TimelapseSettings? = nil)
+  public static func == (a: IVSDK.DeviceCloudSettings, b: IVSDK.DeviceCloudSettings) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct CloudAiDetections : Swift.Codable, Swift.Equatable {
+  public var motion: Swift.Bool?
+  public var person: Swift.Bool?
+  public var vehicle: Swift.Bool?
+  public var animal: Swift.Bool?
+  public var bird: Swift.Bool?
+  public init(motion: Swift.Bool? = nil, person: Swift.Bool? = nil, vehicle: Swift.Bool? = nil, animal: Swift.Bool? = nil, bird: Swift.Bool? = nil)
+  public static func == (lhs: IVSDK.CloudAiDetections, rhs: IVSDK.CloudAiDetections) -> Swift.Bool
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -755,7 +346,8 @@ public struct EventDetectionSettings : Swift.Codable, Swift.Equatable {
   public var vehicle: Swift.Bool
   public var animal: Swift.Bool
   public var coolDown: Swift.String
-  public init(motion: Swift.Bool, person: Swift.Bool, vehicle: Swift.Bool, animal: Swift.Bool, coolDown: Swift.String)
+  public var bird: Swift.Bool?
+  public init(motion: Swift.Bool, person: Swift.Bool, vehicle: Swift.Bool, animal: Swift.Bool, coolDown: Swift.String, bird: Swift.Bool? = nil)
   public static func == (lhs: IVSDK.EventDetectionSettings, rhs: IVSDK.EventDetectionSettings) -> Swift.Bool
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
@@ -852,7 +444,8 @@ public struct DeviceModelInfo : Swift.Codable {
   public var modelId: Swift.String
   public var modelName: Swift.String
   public var variantName: Swift.String?
-  public init(did: Swift.String, modelId: Swift.String, modelName: Swift.String, variantName: Swift.String?)
+  public var modelDetails: IVSDK.CameraModelFeatures?
+  public init(did: Swift.String, modelId: Swift.String, modelName: Swift.String, variantName: Swift.String?, modelDetails: IVSDK.CameraModelFeatures?)
   public var displayModelName: Swift.String {
     get
   }
@@ -866,9 +459,351 @@ public struct DevicePosition : Swift.Codable {
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
+public struct ActivityZoneModel : Swift.Codable {
+  public var nonClusterDevices: [IVSDK.ActivityZoneDevice]
+  public var clusterDevices: [IVSDK.Cluster]
+  public init(nonClusterDevices: [IVSDK.ActivityZoneDevice], clusterDevices: [IVSDK.Cluster])
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct ActivityZoneDevice : Swift.Codable {
+  public var motionZoneEnabled: Swift.Bool
+  public var motionZones: [Swift.Int]
+  public var deviceId: Swift.String
+  public init(motionZoneEnabled: Swift.Bool, motionZones: [Swift.Int], deviceId: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+extension Foundation.NSNotification.Name {
+  public static let sessionTokenExpired: Foundation.Notification.Name
+}
+public enum Environment {
+  case production
+  case staging
+  case dev
+  public static func == (a: IVSDK.Environment, b: IVSDK.Environment) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+public enum ServerRegion : Swift.String {
+  case us
+  case apac
+  public init?(rawValue: Swift.String)
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+@_hasMissingDesignatedInitializers final public class InstaSDK {
+  public static let shared: IVSDK.InstaSDK
+  final public var refreshAuthToken: (() -> Swift.String)?
+  final public func configure(_ clientId: Swift.String = SDKConfig.clientId, partnerId: Swift.String)
+  final public func setRegion(_ region: IVSDK.ServerRegion)
+  final public func setEnvironment(_ environment: IVSDK.Environment)
+  final public func setPartnerId(_ partnerId: Swift.String)
+  final public func setAuthToken(_ token: Swift.String)
+  @objc deinit
+}
+@_Concurrency.MainActor @preconcurrency public struct VideoView : SwiftUI.UIViewRepresentable {
+  @_Concurrency.MainActor @preconcurrency public let remoteView: IVSDK.IVVideoView
+  @_Concurrency.MainActor @preconcurrency public func updateUIView(_ uiView: IVSDK.IVVideoView, context: IVSDK.VideoView.Context)
+  @_Concurrency.MainActor @preconcurrency public func makeUIView(context: IVSDK.VideoView.Context) -> IVSDK.IVVideoView
+  @_Concurrency.MainActor @preconcurrency public func captureSnapshot() -> UIKit.UIImage
+  @_Concurrency.MainActor @preconcurrency public func makeCoordinator() -> IVSDK.VideoView.Coordinator
+  @objc @_hasMissingDesignatedInitializers public class Coordinator : ObjectiveC.NSObject {
+    @objc deinit
+  }
+  public typealias Body = Swift.Never
+  public typealias UIViewType = IVSDK.IVVideoView
+}
+public protocol DeviceServiceContract {
+  func devices(_ spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.ListDataModel<IVSDK.DeviceModel>>
+  func device(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.DeviceModel>
+  func getDeviceSettings(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.DeviceSettingModel>
+  func getDeviceCloudSettings(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.DeviceCloudSettings>
+  func getAllDevicesSettings(spaceId: Swift.String, queryItems: [IVSDK.QueryItem]) -> IVSDK.IVPublisher<[IVSDK.DeviceSettingModel]>
+  func updateDeviceSettings(spaceId: Swift.String, deviceId: Swift.String, wakeup: Swift.Bool, request: IVSDK.UpdateDeviceSettingRequestModel?) -> IVSDK.IVPublisher<IVSDK.DeviceSettingModel>
+  func updateDeviceLightSetting(spaceId: Swift.String, deviceId: Swift.String, wakeup: Swift.Bool, request: IVSDK.UpdateDeviceLightSettingRequestModel?) -> IVSDK.IVPublisher<IVSDK.DeviceSettingModel>
+  func updateDeviceCloudAISettings(spaceId: Swift.String, deviceId: Swift.String, wakeup: Swift.Bool, request: IVSDK.EventDetectionSettingsRequest?) -> IVSDK.IVPublisher<IVSDK.DeviceCloudSettings>
+  func updateDeviceCloudNotificationsSettings(spaceId: Swift.String, deviceId: Swift.String, wakeup: Swift.Bool, request: IVSDK.NotificationSettingsRequest?) -> IVSDK.IVPublisher<IVSDK.DeviceCloudSettings>
+  func updateDeviceTimelapseSettings(spaceId: Swift.String, deviceId: Swift.String, wakeup: Swift.Bool, request: IVSDK.TimelapseSettingsRequest?) -> IVSDK.IVPublisher<IVSDK.DeviceCloudSettings>
+  func updateDevice(spaceId: Swift.String, deviceId: Swift.String, request: IVSDK.UpdateDeviceRequest?) -> IVSDK.IVPublisher<IVSDK.DeviceModel>
+  func deleteDevice(spaceId: Swift.String, deviceId: Swift.String, wakeup: Swift.Bool) -> IVSDK.IVPublisher<Swift.Void>
+  func getLatestFirmwareVersion(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.FirmwareVersionModel>
+  func getFirmwareUpdatingStatus(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.FirmwareStatusModel>
+  func upgradeFirmware(spaceId: Swift.String, deviceId: Swift.String, wakeup: Swift.Bool, request: IVSDK.FirmwareUpdateRequest) -> IVSDK.IVPublisher<Swift.Void>
+  func movePtz(spaceId: Swift.String, deviceId: Swift.String, request: IVSDK.MovePtzRequest) -> IVSDK.IVPublisher<Swift.Void>
+  func resetPtz(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
+  func stopPtz(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
+  func deviceModelInfo(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.DeviceModelInfo>
+  func formatSDCard(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
+  func wakeup(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
+  func wakeupDevice(spaceId: Swift.String, deviceId: Swift.String, request: (any Swift.Decodable & Swift.Encodable)?) -> IVSDK.IVPublisher<(any Swift.Decodable & Swift.Encodable)?>
+  func setDeviceBitrate(spaceId: Swift.String, deviceId: Swift.String, request: IVSDK.BitrateRequest) -> IVSDK.IVPublisher<Swift.Void>
+  func getDeviceClusters(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.CameraClustersModel>
+  func updateDeviceClustersAttribute(spaceId: Swift.String, deviceId: Swift.String, clusterId: Swift.String, attributeId: Swift.String, wakeup: Swift.Bool, request: IVSDK.UpdateClusterAttributeRequestModel) -> IVSDK.IVPublisher<IVSDK.ClusterUpdateRespModel>
+  func updateDeviceCluster(spaceId: Swift.String, deviceId: Swift.String, clusterId: Swift.String, wakeup: Swift.Bool, request: IVSDK.UpdateClusterMultipleAttributeRequestModel) -> IVSDK.IVPublisher<IVSDK.ClusterUpdateRespModel>
+  func getProSecurityProfileDevicesActivityZone(spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.ActivityZoneModel>
+}
+public enum Bitrate : Swift.String {
+  case auto
+  case hd
+  public init?(rawValue: Swift.String)
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public struct BitrateRequest : Swift.Codable {
+  public var bitrate: Swift.String
+  public init(bitrate: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
 public struct DownloadAuthTokenModel : Swift.Codable {
   public var authorizationToken: Swift.String
   public init(authorizationToken: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SDKConfig {
+  public static let clientId: Swift.String
+  public static let sessionId: Swift.String
+}
+public protocol SpaceServiceContract {
+  func createSpace(request: IVSDK.CreateSpaceRequest) -> IVSDK.IVPublisher<Swift.Void>
+  func updateSpace(spaceId: Swift.String, request: IVSDK.CreateSpaceRequest) -> IVSDK.IVPublisher<Swift.Void>
+  func spaces() -> IVSDK.IVPublisher<[IVSDK.SpaceModel]>
+  func getSpaceInvitaions() -> IVSDK.IVPublisher<[IVSDK.SharedSpaceModel]>
+  func getDevicesLatestFirmware(spaceId: Swift.String) -> IVSDK.IVPublisher<[IVSDK.LatestFirmwareVersionModel]>
+  func updateSpaceInvitaionResponse(invitationId: Swift.String, request: IVSDK.SpaceInvitaionRequest) -> IVSDK.IVPublisher<Swift.Void>
+  func getSpaceSharedUsers(spaceId: Swift.String) -> IVSDK.IVPublisher<[IVSDK.SpaceSharedUser]>
+  func spaceShareSendInvitation(spaceId: Swift.String, request: IVSDK.SpaceShareUserInviteRequest) -> IVSDK.IVPublisher<Swift.Void>
+  func updateSpaceShareDetail(spaceId: Swift.String, spaceUserId: Swift.String, request: IVSDK.SpaceShareUserInviteRequest) -> IVSDK.IVPublisher<Swift.Void>
+  func updateUserSpaceInvitation(spaceId: Swift.String, invitationId: Swift.String, request: IVSDK.SpaceShareUserInviteRequest) -> IVSDK.IVPublisher<Swift.Void>
+  func cancelSpaceShareInvitation(spaceId: Swift.String, invitationId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
+  func revokeSpaceShareAccess(spaceId: Swift.String, spaceUserId: Swift.String, queryItems: [IVSDK.QueryItem]?) -> IVSDK.IVPublisher<Swift.Void>
+  func connectionCredential(spaceId: Swift.String, queryItems: [IVSDK.QueryItem]) -> IVSDK.IVPublisher<IVSDK.ConnectionCred>
+  func createPairingSessionKey(spaceId: Swift.String, request: IVSDK.PairingSessionKeyRequest) -> IVSDK.IVPublisher<IVSDK.PairingSessionKeyModel>
+  func getPairingSessionStatus(spaceId: Swift.String, sessionKey: Swift.String) -> IVSDK.IVPublisher<IVSDK.PairingSessionStatusModel>
+  func events(spaceId: Swift.String, queryItems: [IVSDK.QueryItem], sortItem: IVSDK.SortItem?) -> IVSDK.IVPublisher<IVSDK.ListDataModel<IVSDK.EventModel>>
+  func event(eventId: Swift.String, spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.EventModel>
+  func deleteEvents(spaceId: Swift.String, request: IVSDK.DeleteEventsRequest) -> IVSDK.IVPublisher<Swift.Void>
+  func getDeletedEvents(spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.DeletedEventsModel>
+  func getB2AuthToken(spaceId: Swift.String) -> IVSDK.IVPublisher<[IVSDK.B2AuthTokenModel]>
+  func getSpaceB2AuthToken(spaceId: Swift.String) -> IVSDK.IVPublisher<[IVSDK.B2AuthTokenModel]>
+  func getUSATimezones(spaceId: Swift.String) -> IVSDK.IVPublisher<[IVSDK.TimezoneModel]>
+  func getUSAStates(spaceId: Swift.String) -> IVSDK.IVPublisher<[IVSDK.StateModel]>
+  func getTimezone(spaceId: Swift.String, queryItems: [IVSDK.QueryItem]) -> IVSDK.IVPublisher<IVSDK.TimezoneModel>
+  func getBirdDetails(spaceId: Swift.String, birdId: Swift.String) -> IVSDK.IVPublisher<IVSDK.BirdDetails>
+  func dailySummaryList(spaceId: Swift.String, queryItems: [IVSDK.QueryItem], sortItem: IVSDK.SortItem?) -> IVSDK.IVPublisher<IVSDK.ListDailySummaryModel>
+  func deleteDailySummaries(spaceId: Swift.String, request: IVSDK.DeleteTimelapseRequest) -> IVSDK.IVPublisher<Swift.Void>
+  func getDeletedDailySummaries(spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.DeletedTimelapseModel>
+}
+public struct AddressModel : Swift.Codable {
+  public var street: Swift.String
+  public var city: Swift.String
+  public var state: Swift.String
+  public var country: Swift.String
+  public var postalCode: Swift.String
+  public var displayAddress: Swift.String {
+    get
+  }
+  public init(street: Swift.String, city: Swift.String, state: Swift.String, country: Swift.String, postalCode: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public enum ProductType : Swift.String {
+  case homeSecurity
+  case bird
+  public init?(rawValue: Swift.String)
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public struct SubscriptionDetails : Swift.Codable {
+  public var id: Swift.String
+  public var skuId: Swift.String
+  public var devices: [Swift.String]
+  public var skuName: Swift.String
+  public var supportedFeatures: [IVSDK.SubscriptionFeature]
+  public var productId: Swift.String
+  public init(id: Swift.String, skuId: Swift.String, devices: [Swift.String], skuName: Swift.String, supportedFeatures: [IVSDK.SubscriptionFeature], productId: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SpaceModel : Swift.Codable {
+  public var id: Swift.String
+  public var name: Swift.String
+  public var owner: Swift.String
+  public var address: IVSDK.AddressModel
+  public var subDetails: [IVSDK.SubscriptionDetails]
+  public var role: Swift.String?
+  public var monitoring: IVSDK.MonitoringModel?
+  public var faceRecognition: Swift.Bool?
+  public init(id: Swift.String, name: Swift.String, owner: Swift.String, address: IVSDK.AddressModel, subDetails: [IVSDK.SubscriptionDetails], role: Swift.String, monitoring: IVSDK.MonitoringModel?, faceRecognition: Swift.Bool? = nil)
+  public func hasProMonitoringPlan() -> Swift.Bool
+  public var homeSecurityPlan: IVSDK.SubscriptionDetails? {
+    get
+  }
+  public var birdPlan: IVSDK.SubscriptionDetails? {
+    get
+  }
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SharedSpaceModel : Swift.Codable {
+  public var deviceIds: [Swift.String]
+  public var id: Swift.String
+  public var spaceDetails: IVSDK.SharedSpaceDetailsModel
+  public var status: Swift.String
+  public var inviter: IVSDK.InviterModel
+  public var type: Swift.String
+  public init(deviceIds: [Swift.String], id: Swift.String, spaceDetails: IVSDK.SharedSpaceDetailsModel, status: Swift.String, inviter: IVSDK.InviterModel, type: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct InviterModel : Swift.Codable {
+  public var name: Swift.String
+  public var email: Swift.String
+  public init(email: Swift.String, name: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SharedSpaceDetailsModel : Swift.Codable {
+  public var address: IVSDK.AddressModel
+  public var id: Swift.String
+  public var name: Swift.String
+  public init(address: IVSDK.AddressModel, id: Swift.String, name: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SpaceSharedUser : Swift.Codable {
+  public var deviceIds: [IVSDK.DeviceIDModel]
+  public var email: Swift.String
+  public var id: Swift.String
+  public var name: Swift.String
+  public var role: Swift.String
+  public var status: IVSDK.InvitationResponse
+  public var types: [Swift.String]?
+  public init(deviceIds: [IVSDK.DeviceIDModel], email: Swift.String, id: Swift.String, name: Swift.String, role: Swift.String, status: IVSDK.InvitationResponse, types: [Swift.String]?)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct DeviceIDModel : Swift.Codable {
+  public var deviceId: Swift.String
+  public var name: Swift.String
+  public init(deviceId: Swift.String, name: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct TimezoneModel : Swift.Codable, Swift.Hashable {
+  public var code: Swift.String
+  public var name: Swift.String
+  public init(code: Swift.String, name: Swift.String)
+  public static func == (a: IVSDK.TimezoneModel, b: IVSDK.TimezoneModel) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct StateModel : Swift.Codable, Swift.Hashable {
+  public var code: Swift.String
+  public var name: Swift.String
+  public init(code: Swift.String, name: Swift.String)
+  public static func == (a: IVSDK.StateModel, b: IVSDK.StateModel) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct MonitoringModel : Swift.Codable {
+  public var deviceList: [Swift.String]
+  public var role: IVSDK.SpaceRoleType
+  public init(deviceList: [Swift.String], role: IVSDK.SpaceRoleType)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct BirdDetails : Swift.Codable {
+  public var id: Swift.String
+  public var articleLink: Swift.String
+  public var name: Swift.String
+  public var call: IVSDK.Call?
+  public var extract: Swift.String
+  public var images: [IVSDK.BirdImage]
+  public var displayName: Swift.String {
+    get
+  }
+  public init(id: Swift.String, articleLink: Swift.String, name: Swift.String, call: IVSDK.Call?, extract: Swift.String, images: [IVSDK.BirdImage])
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct Call : Swift.Codable, Swift.Equatable {
+  public var source: Swift.String
+  public var url: Swift.String
+  public init(source: Swift.String, url: Swift.String)
+  public static func == (a: IVSDK.Call, b: IVSDK.Call) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public enum BirdImageTag : Swift.String {
+  case male
+  case female
+  case thumnail
+  public init?(rawValue: Swift.String)
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public struct BirdImage : Swift.Codable, Swift.Equatable {
+  public var tags: [Swift.String]?
+  public var resolution: Swift.String
+  public var url: Swift.String
+  public init(tags: [Swift.String]? = nil, resolution: Swift.String, url: Swift.String)
+  public static func == (a: IVSDK.BirdImage, b: IVSDK.BirdImage) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct CreateSpaceRequest : Swift.Codable {
+  public var name: Swift.String
+  public var address: IVSDK.AddressModel
+  public init(name: Swift.String, address: IVSDK.AddressModel)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SpaceInvitaionRequest : Swift.Codable {
+  public var action: IVSDK.InvitationResponse
+  public var phoneNumber: IVSDK.PhoneNumber?
+  public init(action: IVSDK.InvitationResponse, phoneNumber: IVSDK.PhoneNumber? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SpaceShareUserInviteRequest : Swift.Codable {
+  public var deviceIds: [Swift.String]
+  public var inviteeEmail: Swift.String?
+  public var role: IVSDK.SpaceRoleType?
+  public var isSecurity: Swift.Bool?
+  public init(deviceIds: [Swift.String], inviteeEmail: Swift.String? = nil, role: IVSDK.SpaceRoleType? = nil, isSecurity: Swift.Bool? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct DeleteEventsRequest : Swift.Codable {
+  public var eventId: [Swift.String]
+  public init(eventId: [Swift.String])
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct DeleteTimelapseRequest : Swift.Codable {
+  public var timelapseIds: [Swift.String]
+  public init(timelapseIds: [Swift.String])
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -892,7 +827,8 @@ public struct EventModel : Swift.Codable, Swift.Identifiable, Swift.Equatable {
   public var contextBody: Swift.String?
   public var timerDuration: Swift.Int?
   public var timerEndTime: Swift.Int64?
-  public init(id: Swift.String, spaceId: Swift.String, deviceId: Swift.String, deviceName: Swift.String? = nil, eventType: Swift.String, startTime: Swift.Int64, endTime: Swift.Int64? = nil, expireAt: Swift.Int64? = nil, snapshotUrl: Swift.String? = nil, videoUrl: Swift.String? = nil, tags: [Swift.String], faceIds: [Swift.String]? = [], faceNames: [Swift.String]? = [], bucketName: Swift.String, bucketKey: Swift.String? = nil, isDownLoading: Swift.Bool? = nil, contextBody: Swift.String? = nil, timerDuration: Swift.Int? = nil, timerEndTime: Swift.Int64? = nil)
+  public var birds: [IVSDK.Bird]?
+  public init(id: Swift.String, spaceId: Swift.String, deviceId: Swift.String, deviceName: Swift.String? = nil, eventType: Swift.String, startTime: Swift.Int64, endTime: Swift.Int64? = nil, expireAt: Swift.Int64? = nil, snapshotUrl: Swift.String? = nil, videoUrl: Swift.String? = nil, tags: [Swift.String], faceIds: [Swift.String]? = [], faceNames: [Swift.String]? = [], bucketName: Swift.String, bucketKey: Swift.String? = nil, isDownLoading: Swift.Bool? = nil, contextBody: Swift.String? = nil, timerDuration: Swift.Int? = nil, timerEndTime: Swift.Int64? = nil, birds: [IVSDK.Bird]? = nil)
   public static func == (a: IVSDK.EventModel, b: IVSDK.EventModel) -> Swift.Bool
   public typealias ID = Swift.String
   public func encode(to encoder: any Swift.Encoder) throws
@@ -905,6 +841,7 @@ public enum EventTag : Swift.String, Swift.CaseIterable {
   case animal
   case alarm
   case doorbellRing
+  case bird
   public init?(rawValue: Swift.String)
   public typealias AllCases = [IVSDK.EventTag]
   public typealias RawValue = Swift.String
@@ -914,6 +851,220 @@ public enum EventTag : Swift.String, Swift.CaseIterable {
   public var rawValue: Swift.String {
     get
   }
+}
+public struct Bird : Swift.Codable, Swift.Equatable, Swift.Identifiable {
+  public var id: Swift.String
+  public var name: Swift.String
+  public var probability: Swift.Double
+  public var displayName: Swift.String {
+    get
+  }
+  public init(id: Swift.String, name: Swift.String, probability: Swift.Double)
+  public static func == (a: IVSDK.Bird, b: IVSDK.Bird) -> Swift.Bool
+  public typealias ID = Swift.String
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct DailySummaryTagInfo : Swift.Codable, Swift.Hashable {
+  public var doorbell: Swift.Int?
+  public var person: Swift.Int?
+  public var vehicle: Swift.Int?
+  public var animal: Swift.Int?
+  public var bird: Swift.Int?
+  public var alarm: Swift.Int?
+  public init(doorbell: Swift.Int? = nil, person: Swift.Int? = nil, vehicle: Swift.Int? = nil, animal: Swift.Int? = nil, bird: Swift.Int? = nil, alarm: Swift.Int? = nil)
+  public static func == (a: IVSDK.DailySummaryTagInfo, b: IVSDK.DailySummaryTagInfo) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct VideoInfo : Swift.Codable, Swift.Hashable {
+  public var url: Swift.String
+  public var srtUrl: Swift.String?
+  public init(url: Swift.String, srtUrl: Swift.String? = nil)
+  public static func == (a: IVSDK.VideoInfo, b: IVSDK.VideoInfo) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct DailySummaryModel : Swift.Codable, Swift.Hashable {
+  public var id: Swift.String
+  public var spaceId: Swift.String
+  public var deviceId: Swift.String
+  public var deviceName: Swift.String
+  public var title: Swift.String
+  public var subtitle: Swift.String
+  public var date: Swift.Int64
+  public var expireAt: Swift.Int64?
+  public var bucketName: Swift.String?
+  public var snapshotUrl: Swift.String?
+  public var video: IVSDK.VideoInfo?
+  public var tagCount: IVSDK.DailySummaryTagInfo?
+  public init(id: Swift.String, spaceId: Swift.String, deviceId: Swift.String, deviceName: Swift.String, title: Swift.String, subtitle: Swift.String, date: Swift.Int64, expireAt: Swift.Int64? = nil, bucketName: Swift.String? = nil, snapshotUrl: Swift.String? = nil, video: IVSDK.VideoInfo? = nil, tagCount: IVSDK.DailySummaryTagInfo?)
+  public static func == (a: IVSDK.DailySummaryModel, b: IVSDK.DailySummaryModel) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct ListDailySummaryModel : Swift.Codable {
+  public var timelapses: [IVSDK.DailySummaryModel]
+  public init(timelapses: [IVSDK.DailySummaryModel])
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public enum IVError : Foundation.LocalizedError {
+  case sdkNotConfigured
+  case emptyPartnerID
+  case noIntenetConnection
+  case nilResponse
+  case requestCancelled
+  case generalErrorMessage
+  case accessTokenNotFound
+  case refreshTokenExpired
+  case googleClientIdNotFound
+  case googleUserTokenNotFound
+  case appleNonceGenerationFailed
+  case appleCredentialNotFound
+  case appleUserTokenNotFound
+  case appleUserTokenMalformed
+  case cameraChannelInfoNotFound
+  case invalidCredential
+  case retry(retryError: any Swift.Error, originalError: any Swift.Error)
+  case invalidImageData
+  public var errorDescription: Swift.String? {
+    get
+  }
+}
+public struct APIError : Swift.Decodable, Foundation.LocalizedError {
+  public let code: Swift.String
+  public let message: Swift.String
+  public var errorDescription: Swift.String? {
+    get
+  }
+  public init(from decoder: any Swift.Decoder) throws
+}
+@_hasMissingDesignatedInitializers public class CodableUtils {
+  public static func encode<T>(_ object: T) -> Swift.String? where T : Swift.Encodable
+  public static func decode<T>(_ jsonString: Swift.String, as objectType: T.Type) -> T? where T : Swift.Decodable
+  @objc deinit
+}
+public struct SubscriptionDataModel : Swift.Codable {
+  public var subscriptionCycle: Swift.Int
+  public var nextBillAmount: Swift.Int
+  public var nextBillingDate: Swift.Int64?
+  public var currency: Swift.String
+  public var supportedFeatures: [IVSDK.SubscriptionFeature]
+  public var devices: [IVSDK.SubscriptionDevice]?
+  public var id: Swift.String
+  public var trial: Swift.Bool
+  public var skuName: Swift.String
+  public var spaceId: Swift.String
+  public var skuId: Swift.String
+  public var startDate: Swift.Int?
+  public var trialStartDate: Swift.Int?
+  public var subscribeStatus: IVSDK.SubscribeStatus?
+  public var subscriptionType: IVSDK.SubscriptionType?
+  public var endDate: Swift.Int64?
+  public var productId: Swift.String
+  public init(subscriptionCycle: Swift.Int, nextBillAmount: Swift.Int, nextBillingDate: Swift.Int64?, currency: Swift.String, supportedFeatures: [IVSDK.SubscriptionFeature], devices: [IVSDK.SubscriptionDevice]?, id: Swift.String, trial: Swift.Bool, skuName: Swift.String, spaceId: Swift.String, skuId: Swift.String, startDate: Swift.Int?, trailStartDate: Swift.Int?, endDate: Swift.Int64?, productId: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SubscriptionFeature : Swift.Codable {
+  public var id: Swift.String
+  public var description: Swift.String
+  public var value: Swift.String?
+  public init(id: Swift.String, description: Swift.String, value: Swift.String?)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SubscriptionDevice : Swift.Codable {
+  public var id: Swift.String
+  public var name: Swift.String
+  public init(id: Swift.String, name: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct FreeTrialResponse : Swift.Codable {
+  public var trial: Swift.Bool
+  public init(trial: Swift.Bool)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SubscriptionPreviewRequest : Swift.Codable {
+  public var skuId: Swift.String
+  public init(skuId: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public enum SubscriptionType : Swift.String, Swift.Codable {
+  case preview
+  case trial
+  case paid
+  public init?(rawValue: Swift.String)
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public enum SubscribeStatus : Swift.String, Swift.Codable {
+  case active
+  case cancelled
+  public init?(rawValue: Swift.String)
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public struct SubscriptionPricePreviewResponse : Swift.Codable {
+  public var id: Swift.String
+  public var level: Swift.Int
+  public var prices: [IVSDK.SubscriptionPrice]
+  public var subscriptionCycle: Swift.Int
+  public var supportedFeatures: [IVSDK.SubscriptionFeatures]
+  public var productId: Swift.String
+  public init(id: Swift.String, level: Swift.Int, prices: [IVSDK.SubscriptionPrice], subscriptionCycle: Swift.Int, supportedFeatures: [IVSDK.SubscriptionFeatures], productId: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SubscriptionPrice : Swift.Codable {
+  public var originalPrice: Swift.Float
+  public var price: Swift.Float
+  public var stripePriceId: Swift.String
+  public init(originalPrice: Swift.Float, price: Swift.Float, stripePriceId: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SubscriptionFeatures : Swift.Codable {
+  public var id: Swift.String
+  public var value: Swift.String
+  public var description: Swift.String
+  public init(id: Swift.String, value: Swift.String, description: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct UpdateFaceNameRequest : Swift.Codable {
+  public var name: Swift.String?
+  public var status: Swift.String?
+  public var thumbnailName: Swift.String?
+  public init(name: Swift.String? = nil, status: Swift.String? = nil, thumbnailName: Swift.String? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct UpdateSpaceFeatureRequest : Swift.Codable {
+  public var faceRecognition: Swift.Bool
+  public init(faceRecognition: Swift.Bool)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
 }
 public struct FaceListModel : Swift.Codable {
   public var authorizationToken: Swift.String
@@ -930,9 +1081,9 @@ public struct FaceItemModel : Swift.Codable, Swift.Hashable {
   public var authToken: Swift.String?
   public var updatedAt: Swift.Int64?
   public init(faceId: Swift.String, name: Swift.String, status: Swift.String, thumbnailUrl: Swift.String, updatedAt: Swift.Int64?)
-  public func hash(into hasher: inout Swift.Hasher)
   public static func == (a: IVSDK.FaceItemModel, b: IVSDK.FaceItemModel) -> Swift.Bool
   public func encode(to encoder: any Swift.Encoder) throws
+  public func hash(into hasher: inout Swift.Hasher)
   public var hashValue: Swift.Int {
     get
   }
@@ -946,18 +1097,137 @@ public struct FaceResponseModel : Swift.Codable, Swift.Hashable {
   public var uploadUrl: Swift.String
   public var folderPath: Swift.String
   public init(authorizationToken: Swift.String, faceId: Swift.String, name: Swift.String, status: Swift.String, uploadUrl: Swift.String, folderPath: Swift.String)
-  public func hash(into hasher: inout Swift.Hasher)
   public static func == (a: IVSDK.FaceResponseModel, b: IVSDK.FaceResponseModel) -> Swift.Bool
   public func encode(to encoder: any Swift.Encoder) throws
+  public func hash(into hasher: inout Swift.Hasher)
   public var hashValue: Swift.Int {
     get
   }
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct UserName : Swift.Codable {
+  public var first: Swift.String
+  public var last: Swift.String
+  public var fullName: Swift.String {
+    get
+  }
+  public init(firstName: Swift.String, lastName: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct PhoneNumber : Swift.Codable {
+  public var code: Swift.String
+  public var number: Swift.String
+  public var verified: Swift.Bool?
+  public var requiredVerification: Swift.Bool?
+  public var otp: Swift.String?
+  public init(code: Swift.String, number: Swift.String, verified: Swift.Bool = false, requiredVerification: Swift.Bool = false, otp: Swift.String? = nil)
+  public func getPhoneNumberValue() -> Swift.String
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct UserModel : Swift.Codable {
+  public var id: Swift.String
+  public var name: IVSDK.UserName
+  public var email: Swift.String
+  public var country: Swift.String
+  public var phoneNumber: IVSDK.PhoneNumber
+  public var emailVerified: Swift.Bool?
+  public var accountSettings: IVSDK.AccountSettings?
+  public var language: Swift.String?
+  public var additionalInfo: IVSDK.UserAdditionalInfo?
+  public init(id: Swift.String, name: IVSDK.UserName, email: Swift.String, country: Swift.String, phoneNumber: IVSDK.PhoneNumber, emailVerified: Swift.Bool?, accountSettings: IVSDK.AccountSettings? = nil, language: Swift.String?, additionalInfo: IVSDK.UserAdditionalInfo? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct UserAdditionalInfo : Swift.Codable {
+  public var arNumber: Swift.String?
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct LastLoggedInUserModel : Swift.Codable {
+  public var name: IVSDK.UserName
+  public var email: Swift.String
+  public var country: Swift.String
+  public init(name: IVSDK.UserName, email: Swift.String, country: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct UserOneTimeTokenModel : Swift.Codable {
+  public var oneTimeToken: Swift.String
+  public var webUrl: Swift.String
+  public init(oneTimeToken: Swift.String, webUrl: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct PairingSessionKeyRequest : Swift.Codable {
+  public var timezoneSettings: IVSDK.TimezoneSettings
+  public init(timezoneSettings: IVSDK.TimezoneSettings)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct TimezoneSettings : Swift.Codable, Swift.Equatable {
+  public var id: Swift.String
+  public var tzFormat: Swift.String
+  public init(id: Swift.String, tzFormat: Swift.String)
+  public static func == (lhs: IVSDK.TimezoneSettings, rhs: IVSDK.TimezoneSettings) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
 public struct ListDataModel<T> : Swift.Codable where T : Swift.Decodable, T : Swift.Encodable {
   public var totalCount: Swift.Int
   public var items: [T]
   public init(totalCount: Swift.Int, items: [T])
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public protocol SystemServiceContract {
+  func ping() -> IVSDK.IVPublisher<Swift.Void>
+  func speedTest() -> IVSDK.IVPublisher<Foundation.Data>
+  func eventM3U8(url: Swift.String) -> IVSDK.IVPublisher<Foundation.Data>
+  func amazonListing() -> IVSDK.IVPublisher<IVSDK.ShopCameraListDataModel>
+  func appStoreVersion(queryItems: [IVSDK.QueryItem]) -> IVSDK.IVPublisher<IVSDK.AppStoreVersionResultModel>
+}
+public protocol SubscriptionServiceContract {
+  func getSubscriptions(spaceId: Swift.String) -> IVSDK.IVPublisher<[IVSDK.SubscriptionDataModel]>
+  func manageSubscribedDevices(subscriptionId: Swift.String, deviceIds: IVSDK.SubscribeDeviceRequest) -> IVSDK.IVPublisher<Swift.Void>
+  func checkFreeTrail() -> IVSDK.IVPublisher<IVSDK.FreeTrialResponse>
+  func cancelSubscription(subscriptionId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
+  func activateSubscriptionPreview(spaceId: Swift.String, request: IVSDK.SubscriptionPreviewRequest) -> IVSDK.IVPublisher<Swift.Void>
+  func getSubscriptionPrices(country: Swift.String, productIds: [Swift.String]) -> IVSDK.IVPublisher<[IVSDK.SubscriptionPricePreviewResponse]>
+}
+public struct ProMonitoringRequest : Swift.Codable {
+  public var address: IVSDK.ProMonitoringAddressModel?
+  public var timezone: Swift.String?
+  public var licenseExpirationDate: Swift.String?
+  public var licenseNumber: Swift.String?
+  public var phoneNumber: IVSDK.PhoneNumber?
+  public var safeword: Swift.String?
+  public var setupStep: Swift.String?
+  public var testMode: Swift.Bool?
+  public var dismissalWindow: Swift.Int?
+  public var exitDelay: Swift.Int?
+  public init(address: IVSDK.ProMonitoringAddressModel? = nil, timezone: Swift.String? = nil, licenseExpirationDate: Swift.String? = nil, licenseNumber: Swift.String? = nil, phoneNumber: IVSDK.PhoneNumber? = nil, safeword: Swift.String? = nil, setupStep: Swift.String? = nil, testMode: Swift.Bool? = nil, dismissalWindow: Swift.Int? = nil, exitDelay: Swift.Int? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct ProMonitoringTestModeRequest : Swift.Codable {
+  public var enable: Swift.Bool
+  public init(enable: Swift.Bool)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct ProMonitoringAcknowledgementRequest : Swift.Codable {
+  public var state: Swift.String
+  public init(state: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct RespondingPartyPhoneNumberRequest : Swift.Codable {
+  public var code: Swift.String
+  public var number: Swift.String
+  public var otp: Swift.String?
+  public init(code: Swift.String, number: Swift.String, otp: Swift.String? = nil)
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -968,11 +1238,99 @@ public struct PairingSessionKeyModel : Swift.Codable {
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
+@objc @_hasMissingDesignatedInitializers @_Concurrency.MainActor @preconcurrency public class IVVideoView : UIKit.UIView {
+  @_Concurrency.MainActor @preconcurrency public var connectionReported: Swift.Bool {
+    get
+    set
+  }
+  @_Concurrency.MainActor @preconcurrency public var connected: (() -> Swift.Void)?
+  @_Concurrency.MainActor @preconcurrency public var frameRecived: (() -> Swift.Void)?
+  @_Concurrency.MainActor @preconcurrency public var endScrolling: (() -> Swift.Void)?
+  @_Concurrency.MainActor @preconcurrency @objc dynamic public init()
+  @_Concurrency.MainActor @preconcurrency public func captureSnapshot(size: CoreFoundation.CGSize?, snapshot: @escaping (UIKit.UIImage?) -> ())
+  @_Concurrency.MainActor @preconcurrency public func startRecording(size: CoreFoundation.CGSize?)
+  @_Concurrency.MainActor @preconcurrency public func stopRecording(completion: @escaping (_ recordingUrl: Foundation.URL?) -> Swift.Void)
+  @objc deinit
+}
+@_Concurrency.MainActor @preconcurrency public struct ViewControllerWrapper : SwiftUI.UIViewControllerRepresentable {
+  @_Concurrency.MainActor @preconcurrency public var viewHeight: CoreFoundation.CGFloat
+  @_Concurrency.MainActor @preconcurrency public var isFullScreen: Swift.Bool
+  @_Concurrency.MainActor @preconcurrency public var content: IVSDK.IVVideoView
+  @_Concurrency.MainActor @preconcurrency public var endScrolling: (() -> Swift.Void)?
+  @_Concurrency.MainActor @preconcurrency public init(content: IVSDK.IVVideoView, viewHeight: CoreFoundation.CGFloat, isFullScreen: Swift.Bool, endScrolling: (() -> Swift.Void)?)
+  @_Concurrency.MainActor @preconcurrency public func makeUIViewController(context: IVSDK.ViewControllerWrapper.Context) -> IVSDK.LiveViewController
+  @_Concurrency.MainActor @preconcurrency public func updateUIViewController(_ uiViewController: IVSDK.LiveViewController, context: IVSDK.ViewControllerWrapper.Context)
+  public typealias Body = Swift.Never
+  public typealias Coordinator = Swift.Void
+  public typealias UIViewControllerType = IVSDK.LiveViewController
+}
+@objc @_inheritsConvenienceInitializers @_Concurrency.MainActor @preconcurrency public class LiveViewController : UIKit.UIViewController, UIKit.UIScrollViewDelegate {
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewDidLoad()
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewWillAppear(_ animated: Swift.Bool)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewDidAppear(_ animated: Swift.Bool)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewWillDisappear(_ animated: Swift.Bool)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewWillTransition(to size: CoreFoundation.CGSize, with coordinator: any UIKit.UIViewControllerTransitionCoordinator)
+  @_Concurrency.MainActor @preconcurrency @objc public func viewForZooming(in scrollView: UIKit.UIScrollView) -> UIKit.UIView?
+  @_Concurrency.MainActor @preconcurrency @objc public func scrollViewDidEndDragging(_ scrollView: UIKit.UIScrollView, willDecelerate decelerate: Swift.Bool)
+  @_Concurrency.MainActor @preconcurrency public func updateState(height: CoreFoundation.CGFloat, isFullScreen: Swift.Bool)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public init(nibName nibNameOrNil: Swift.String?, bundle nibBundleOrNil: Foundation.Bundle?)
+  @_Concurrency.MainActor @preconcurrency @objc required dynamic public init?(coder: Foundation.NSCoder)
+  @objc deinit
+}
+public struct AppStoreVersionResultModel : Swift.Codable {
+  public var results: [IVSDK.AppStoreVersionModel]
+  public init(versions: [IVSDK.AppStoreVersionModel])
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct AppStoreVersionModel : Swift.Codable {
+  public var version: Swift.String
+  public init(version: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+@_hasMissingDesignatedInitializers public class Event {
+  public class func parseEvent(event: Swift.String) -> IVSDK.Message?
+  @objc deinit
+}
+extension Swift.String {
+  public func base64Decoded() -> Swift.String?
+}
+public struct SignupRequest : Swift.Codable {
+  public var name: IVSDK.UserName
+  public var email: Swift.String
+  public var country: Swift.String
+  public var phoneNumber: IVSDK.PhoneNumber
+  public var password: Swift.String
+  public var language: Swift.String
+  public init(name: IVSDK.UserName, email: Swift.String, country: Swift.String, phoneNumber: IVSDK.PhoneNumber, password: Swift.String, language: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
 public struct PairingSessionStatusModel : Swift.Codable {
   public var deviceId: Swift.String
   public var expired: Swift.Bool
   public var status: Swift.String
   public init(deviceId: Swift.String, expired: Swift.Bool, status: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct B2AuthTokenModel : Swift.Codable {
+  public var authToken: Swift.String
+  public var bucketName: Swift.String
+  public var deviceId: Swift.String?
+  public init(authToken: Swift.String, bucketName: Swift.String, deviceId: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+@_hasMissingDesignatedInitializers public class QRCodeGenerator {
+  public static func generateQRCode(from dict: [Swift.String : Swift.String]) -> UIKit.UIImage?
+  public static func generateQRCode(from string: Swift.String, size: CoreFoundation.CGFloat = 1024) -> UIKit.UIImage?
+  @objc deinit
+}
+public struct SubscribeDeviceRequest : Swift.Codable {
+  public var deviceIds: [Swift.String]
+  public init(deviceIds: [Swift.String])
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -1085,335 +1443,264 @@ public struct RespondingParty : Swift.Codable {
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
-public struct SecurityLogsModel : Swift.Codable, Swift.Equatable {
-  public var id: Swift.String
-  public var spaceId: Swift.String
-  public var type: Swift.String
-  public var createdAt: Swift.Int64
-  public var properties: IVSDK.SecurityProperties?
-  public init(id: Swift.String, spaceId: Swift.String, type: Swift.String, createdAt: Swift.Int64, properties: IVSDK.SecurityProperties?)
-  public static func == (lhs: IVSDK.SecurityLogsModel, rhs: IVSDK.SecurityLogsModel) -> Swift.Bool
+public struct CameraClustersModel : Swift.Codable {
+  public var clusters: [IVSDK.Cluster]
+  public init(clusters: [IVSDK.Cluster])
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
-public struct SecurityProperties : Swift.Codable {
-  public var id: Swift.String?
-  public var alarmId: Swift.String?
-  public var startTime: Swift.Int64?
-  public var snapshotUrl: Swift.String?
-  public var bucketAlias: Swift.String?
+public struct ClusterUpdateRespModel : Swift.Codable {
+  public var cluster: IVSDK.Cluster
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct Cluster : Swift.Codable {
   public var deviceId: Swift.String?
-  public var deviceName: Swift.String?
-  public var time: Swift.Int64?
-  public var disarmedMethod: Swift.String?
-  public var user: IVSDK.SecurityPropertyUser?
-  public var armTimeOut: Swift.Int64?
-  public var devices: [IVSDK.SecurityPropertyDevice]?
-  public init(id: Swift.String? = nil, alarmId: Swift.String? = nil, startTime: Swift.Int64? = nil, snapshotUrl: Swift.String? = nil, bucketAlias: Swift.String? = nil, deviceId: Swift.String? = nil, deviceName: Swift.String? = nil, time: Swift.Int64? = nil, disarmedMethod: Swift.String? = nil, user: IVSDK.SecurityPropertyUser? = nil, armTimeOut: Swift.Int64? = nil, devices: [IVSDK.SecurityPropertyDevice]? = nil)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct SecurityPropertyUser : Swift.Codable {
   public var id: Swift.String
-  public var name: Swift.String
-  public init(id: Swift.String, name: Swift.String)
+  public var attributes: [IVSDK.Attribute]?
+  public init(deviceId: Swift.String? = nil, id: Swift.String, attributes: [IVSDK.Attribute]? = nil)
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
-public struct SecurityPropertyDevice : Swift.Codable {
+public struct Attribute : Swift.Codable {
   public var id: Swift.String
-  public var name: Swift.String
-  public var armStatus: Swift.String
-  public init(id: Swift.String, name: Swift.String, armStatus: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct ShopCameraListDataModel : Swift.Codable {
-  public var cameras: [IVSDK.ShopCameraModel]
-  public init(cameras: [IVSDK.ShopCameraModel])
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct ShopCameraModel : Swift.Codable, Swift.Hashable {
-  public var actualPrice: Swift.Double
-  public var category: Swift.String
-  public var currencySymbol: Swift.String
-  public var description: Swift.String
-  public var listingUrl: Swift.String
-  public var name: Swift.String
-  public var rating: Swift.Double
-  public var thumbnail: Swift.String
-  public var offerPrice: Swift.Double?
-  public init(actualPrice: Swift.Double, category: Swift.String, currencySymbol: Swift.String, description: Swift.String, listingUrl: Swift.String, name: Swift.String, rating: Swift.Double, thumbnail: Swift.String, offerPrice: Swift.Double?)
-  public func hash(into hasher: inout Swift.Hasher)
-  public static func == (a: IVSDK.ShopCameraModel, b: IVSDK.ShopCameraModel) -> Swift.Bool
-  public func encode(to encoder: any Swift.Encoder) throws
-  public var hashValue: Swift.Int {
-    get
-  }
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct AddressModel : Swift.Codable {
-  public var street: Swift.String
-  public var city: Swift.String
-  public var state: Swift.String
-  public var country: Swift.String
-  public var postalCode: Swift.String
-  public var displayAddress: Swift.String {
-    get
-  }
-  public init(street: Swift.String, city: Swift.String, state: Swift.String, country: Swift.String, postalCode: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct SubscriptionDetails : Swift.Codable {
-  public var id: Swift.String
-  public var skuId: Swift.String
-  public var devices: [Swift.String]
-  public var skuName: Swift.String
-  public var supportedFeatures: [IVSDK.SubscriptionFeature]
-  public init(id: Swift.String, skuId: Swift.String, devices: [Swift.String], skuName: Swift.String, supportedFeatures: [IVSDK.SubscriptionFeature])
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct SpaceModel : Swift.Codable {
-  public var id: Swift.String
-  public var name: Swift.String
-  public var owner: Swift.String
-  public var address: IVSDK.AddressModel
-  public var subscriptionDetails: IVSDK.SubscriptionDetails?
-  public var role: Swift.String?
-  public var monitoring: IVSDK.MonitoringModel?
-  public var faceRecognition: Swift.Bool?
-  public init(id: Swift.String, name: Swift.String, owner: Swift.String, address: IVSDK.AddressModel, subscriptionDetails: IVSDK.SubscriptionDetails?, role: Swift.String, monitoring: IVSDK.MonitoringModel?, faceRecognition: Swift.Bool? = nil)
-  public func hasProMonitoringPlan() -> Swift.Bool
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct SharedSpaceModel : Swift.Codable {
-  public var deviceIds: [Swift.String]
-  public var id: Swift.String
-  public var spaceDetails: IVSDK.SharedSpaceDetailsModel
-  public var status: Swift.String
-  public var inviter: IVSDK.InviterModel
   public var type: Swift.String
-  public init(deviceIds: [Swift.String], id: Swift.String, spaceDetails: IVSDK.SharedSpaceDetailsModel, status: Swift.String, inviter: IVSDK.InviterModel, type: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct InviterModel : Swift.Codable {
-  public var name: Swift.String
-  public var email: Swift.String
-  public init(email: Swift.String, name: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct SharedSpaceDetailsModel : Swift.Codable {
-  public var address: IVSDK.AddressModel
-  public var id: Swift.String
-  public var name: Swift.String
-  public init(address: IVSDK.AddressModel, id: Swift.String, name: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct SpaceSharedUser : Swift.Codable {
-  public var deviceIds: [IVSDK.DeviceIDModel]
-  public var email: Swift.String
-  public var id: Swift.String
-  public var name: Swift.String
-  public var role: Swift.String
-  public var status: IVSDK.InvitationResponse
-  public var types: [Swift.String]?
-  public init(deviceIds: [IVSDK.DeviceIDModel], email: Swift.String, id: Swift.String, name: Swift.String, role: Swift.String, status: IVSDK.InvitationResponse, types: [Swift.String]?)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct DeviceIDModel : Swift.Codable {
-  public var deviceId: Swift.String
-  public var name: Swift.String
-  public init(deviceId: Swift.String, name: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct TimezoneModel : Swift.Codable, Swift.Hashable {
-  public var code: Swift.String
-  public var name: Swift.String
-  public init(code: Swift.String, name: Swift.String)
-  public func hash(into hasher: inout Swift.Hasher)
-  public static func == (a: IVSDK.TimezoneModel, b: IVSDK.TimezoneModel) -> Swift.Bool
-  public func encode(to encoder: any Swift.Encoder) throws
-  public var hashValue: Swift.Int {
+  public var property: IVSDK.Property?
+  public var valueType: IVSDK.AttributeType {
     get
   }
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct StateModel : Swift.Codable, Swift.Hashable {
-  public var code: Swift.String
-  public var name: Swift.String
-  public init(code: Swift.String, name: Swift.String)
-  public func hash(into hasher: inout Swift.Hasher)
-  public static func == (a: IVSDK.StateModel, b: IVSDK.StateModel) -> Swift.Bool
-  public func encode(to encoder: any Swift.Encoder) throws
-  public var hashValue: Swift.Int {
-    get
-  }
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct MonitoringModel : Swift.Codable {
-  public var deviceList: [Swift.String]
-  public var role: IVSDK.SpaceRoleType
-  public init(deviceList: [Swift.String], role: IVSDK.SpaceRoleType)
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
-public struct SubscriptionDataModel : Swift.Codable {
-  public var subscriptionCycle: Swift.Int
-  public var nextBillAmount: Swift.Int
-  public var nextBillingDate: Swift.Int64?
-  public var currency: Swift.String
-  public var supportedFeatures: [IVSDK.SubscriptionFeature]
-  public var devices: [IVSDK.SubscriptionDevice]?
-  public var id: Swift.String
-  public var trial: Swift.Bool
-  public var skuName: Swift.String
-  public var spaceId: Swift.String
-  public var skuId: Swift.String
-  public var startDate: Swift.Int?
-  public var trialStartDate: Swift.Int?
-  public var subscribeStatus: IVSDK.SubscribeStatus?
-  public var subscriptionType: IVSDK.SubscriptionType?
-  public var endDate: Swift.Int64?
-  public init(subscriptionCycle: Swift.Int, nextBillAmount: Swift.Int, nextBillingDate: Swift.Int64?, currency: Swift.String, supportedFeatures: [IVSDK.SubscriptionFeature], devices: [IVSDK.SubscriptionDevice]?, id: Swift.String, trial: Swift.Bool, skuName: Swift.String, spaceId: Swift.String, skuId: Swift.String, startDate: Swift.Int?, trailStartDate: Swift.Int?, endDate: Swift.Int64?)
+public struct Property : Swift.Codable {
+  public var value: IVSDK.AttributeValue?
+  public var isNumeric: Swift.Bool?
+  public var labels: [IVSDK.OptionDisplay]?
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
-public struct SubscriptionFeature : Swift.Codable {
-  public var id: Swift.String
-  public var description: Swift.String
-  public var value: Swift.String?
-  public init(id: Swift.String, description: Swift.String, value: Swift.String?)
+public struct OptionDisplay : Swift.Codable, Swift.Equatable {
+  public var enumValue: Swift.String
+  public var label: Swift.String
+  public static func == (a: IVSDK.OptionDisplay, b: IVSDK.OptionDisplay) -> Swift.Bool
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
-public struct SubscriptionDevice : Swift.Codable {
-  public var id: Swift.String
-  public var name: Swift.String
-  public init(id: Swift.String, name: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct FreeTrialResponse : Swift.Codable {
-  public var trial: Swift.Bool
-  public init(trial: Swift.Bool)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct SubscriptionPreviewRequest : Swift.Codable {
-  public var skuId: Swift.String
-  public init(skuId: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public enum SubscriptionType : Swift.String, Swift.Codable {
-  case preview
-  case trial
-  case paid
+public enum AttributeType : Swift.String {
+  case bool
+  case string
+  case int
+  case value
+  case `enum`
+  case array
+  case dictionary
+  case json
+  public func getValue(value: Any) -> IVSDK.AttributeValue
   public init?(rawValue: Swift.String)
   public typealias RawValue = Swift.String
   public var rawValue: Swift.String {
     get
   }
 }
-public enum SubscribeStatus : Swift.String, Swift.Codable {
-  case active
-  case cancelled
+public enum AttributeValue : Swift.Codable {
+  case bool(Swift.Bool)
+  case string(Swift.String)
+  case int(Swift.Int)
+  case double(Swift.Double)
+  case dictionary([Swift.String : IVSDK.AttributeValue])
+  case array([IVSDK.AttributeValue])
+  case null
+  public init(from decoder: any Swift.Decoder) throws
+  public func encode(to encoder: any Swift.Encoder) throws
+  public var stringValue: Swift.String? {
+    get
+  }
+  public var intValue: Swift.Int? {
+    get
+  }
+  public var doubleValue: Swift.Double? {
+    get
+  }
+  public var boolValue: Swift.Bool? {
+    get
+  }
+  public var arrayValue: [IVSDK.AttributeValue]? {
+    get
+  }
+}
+public struct UpdateClusterRequestModel : Swift.Codable {
+  public var clusterId: Swift.String
+  public var attributeId: Swift.String
+  public var clusterAttributeRequestModel: IVSDK.UpdateClusterAttributeRequestModel
+  public init(clusterId: Swift.String, attributeId: Swift.String, clusterAttributeRequestModel: IVSDK.UpdateClusterAttributeRequestModel)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct UpdateClusterAttributeRequestModel : Swift.Codable {
+  public var type: Swift.String
+  public var value: IVSDK.AttributeValue
+  public var attributeId: Swift.String?
+  public init(type: Swift.String, value: IVSDK.AttributeValue, attributeId: Swift.String? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct UpdateClusterMultipleAttributeRequestModel : Swift.Codable {
+  public var attributes: [IVSDK.UpdateClusterAttributeRequestModel]
+  public init(attributes: [IVSDK.UpdateClusterAttributeRequestModel])
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public enum ClustersType : Swift.String, Swift.CaseIterable {
+  case privacyMode
+  case cameraLight
+  case pirSensitivityLevel
+  case motionDetection
+  case motionSensorSensitivityLevel
+  case securityState
+  case hdrEnable
+  case nightVision
+  case audioSettings
+  case rotationalAngle
+  case statusLight
+  case timeZone
+  case osdSettings
+  case ptz
+  case alwaysON
+  case activityZone
+  case eventScheduling
+  case eventDuration
+  case humanTracking
+  case guideLamp
+  case alarmLight
+  case floodLight
+  case bitRate
+  case sdCardSettings
+  public var clusterId: Swift.String {
+    get
+  }
+  public var attributes: [IVSDK.ClustersAttribute] {
+    get
+  }
+  public init?(rawValue: Swift.String)
+  public typealias AllCases = [IVSDK.ClustersType]
+  public typealias RawValue = Swift.String
+  nonisolated public static var allCases: [IVSDK.ClustersType] {
+    get
+  }
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public enum ClustersAttribute : Swift.String, Swift.CaseIterable {
+  case eventSchedulingEnable
+  case eventSchedulingStartTime
+  case eventSchedulingEndTime
+  case sensitivityLevel
+  case rotationAngle
+  case audioSettingsMicrophoneEnabled
+  case audioSettingsVolumeLevel
+  case audioSettingsSpeakerEnabled
+  case privacyMode
+  case motionDetectionEnable
+  case motionDetectionCoolDownPeriod
+  case nightVisionSettings
+  case motionZonesEnabled
+  case osdSettingsInstaviewLogo
+  case osdSettingsTimeStamp
+  case motionZone
+  case statusLightEnabled
+  case light
+  case ltMode
+  case humanTracking
+  case sdCardCVR
+  case sdCardVideoFormat
+  case timezoneIdentifier
+  case timezoneOffset
+  case hdrEnabled
+  case eventDuration
+  case alwaysOn
+  case pirSensitivityLevel
+  case fldLtMode
+  case guideLampMode
+  case alarmLight
+  case bitRate
+  case ptzPan
+  case ptzTilt
+  case armID
+  case exitDelay
+  case securityState
+  public var attributeId: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.String)
+  public typealias AllCases = [IVSDK.ClustersAttribute]
+  public typealias RawValue = Swift.String
+  nonisolated public static var allCases: [IVSDK.ClustersAttribute] {
+    get
+  }
+  public var rawValue: Swift.String {
+    get
+  }
+}
+extension Swift.String {
+  public var trim: Swift.String {
+    get
+  }
+}
+public class Message : Swift.Codable {
+  public init(_ action: Swift.String, _ senderClientId: Swift.String, _ messagePayload: Swift.String)
+  public init(_ action: Swift.String, _ recipientClientId: Swift.String, _ senderClientId: Swift.String, _ messagePayload: Swift.String)
+  public func getAction() -> Swift.String
+  public func setAction(action: Swift.String)
+  public func getRecipientClientId() -> Swift.String
+  public func setRecipientClientId(recipientClientId: Swift.String)
+  public func getSenderClientId() -> Swift.String
+  public func setSenderClientId(senderClientId: Swift.String)
+  public func getMessagePayload() -> Swift.String
+  public func setMessagePayload(messagePayload: Swift.String)
+  public class func createAnswerMessage(sdp: Swift.String, _ recipientClientId: Swift.String) -> IVSDK.Message
+  public class func createOfferMessage(sdp: Swift.String, senderClientId: Swift.String, playbackTime: Foundation.TimeInterval?, playbackEndTime: Foundation.TimeInterval?) -> IVSDK.Message
+  @objc deinit
+  public func encode(to encoder: any Swift.Encoder) throws
+  required public init(from decoder: any Swift.Decoder) throws
+}
+public struct PlaybackMediaInfo : Swift.Codable {
+  public var start: Swift.Int64
+  public var end: Swift.Int64
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct PlaybackMessage : Swift.Codable, Swift.Equatable {
+  public var senderClientId: Swift.String
+  public var type: Swift.String
+  public var action: IVSDK.PlaybackAction
+  public var time: Swift.Int64?
+  public var startTime: Swift.Int64?
+  public var endTime: Swift.Int64?
+  public var list: [IVSDK.PlaybackMediaInfo]?
+  public var timeStamp: Swift.Int64?
+  public var version: Swift.String?
+  public init(action: IVSDK.PlaybackAction, time: Swift.Int64? = nil, startTime: Swift.Int64? = nil, endTime: Swift.Int64? = nil)
+  public static func == (lhs: IVSDK.PlaybackMessage, rhs: IVSDK.PlaybackMessage) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public enum PlaybackAction : Swift.String, Swift.Codable {
+  case seek
+  case play
+  case pause
+  case mediaInfo
+  case tsTimeStamp
+  case mediaInfoStartTime
+  case playing
+  case pausing
+  case seeking
+  case playbackEnd
   public init?(rawValue: Swift.String)
   public typealias RawValue = Swift.String
   public var rawValue: Swift.String {
     get
   }
-}
-public struct SubscriptionPricePreviewResponse : Swift.Codable {
-  public var id: Swift.String
-  public var level: Swift.Int
-  public var prices: [IVSDK.SubscriptionPrice]
-  public var subscriptionCycle: Swift.Int
-  public var supportedFeatures: [IVSDK.SubscriptionFeatures]
-  public init(id: Swift.String, level: Swift.Int, prices: [IVSDK.SubscriptionPrice], subscriptionCycle: Swift.Int, supportedFeatures: [IVSDK.SubscriptionFeatures])
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct SubscriptionPrice : Swift.Codable {
-  public var originalPrice: Swift.Float
-  public var price: Swift.Float
-  public var stripePriceId: Swift.String
-  public init(originalPrice: Swift.Float, price: Swift.Float, stripePriceId: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct SubscriptionFeatures : Swift.Codable {
-  public var id: Swift.String
-  public var value: Swift.String
-  public var description: Swift.String
-  public init(id: Swift.String, value: Swift.String, description: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct UserName : Swift.Codable {
-  public var first: Swift.String
-  public var last: Swift.String
-  public var fullName: Swift.String {
-    get
-  }
-  public init(firstName: Swift.String, lastName: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct PhoneNumber : Swift.Codable {
-  public var code: Swift.String
-  public var number: Swift.String
-  public var verified: Swift.Bool?
-  public var requiredVerification: Swift.Bool?
-  public var otp: Swift.String?
-  public init(code: Swift.String, number: Swift.String, verified: Swift.Bool = false, requiredVerification: Swift.Bool = false, otp: Swift.String? = nil)
-  public func getPhoneNumberValue() -> Swift.String
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct UserModel : Swift.Codable {
-  public var id: Swift.String
-  public var name: IVSDK.UserName
-  public var email: Swift.String
-  public var country: Swift.String
-  public var phoneNumber: IVSDK.PhoneNumber
-  public var emailVerified: Swift.Bool?
-  public var accountSettings: IVSDK.AccountSettings?
-  public var language: Swift.String?
-  public init(id: Swift.String, name: IVSDK.UserName, email: Swift.String, country: Swift.String, phoneNumber: IVSDK.PhoneNumber, emailVerified: Swift.Bool?, accountSettings: IVSDK.AccountSettings? = nil, language: Swift.String?)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct LastLoggedInUserModel : Swift.Codable {
-  public var name: IVSDK.UserName
-  public var email: Swift.String
-  public var country: Swift.String
-  public init(name: IVSDK.UserName, email: Swift.String, country: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct UserOneTimeTokenModel : Swift.Codable {
-  public var oneTimeToken: Swift.String
-  public var webUrl: Swift.String
-  public init(oneTimeToken: Swift.String, webUrl: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public struct WifiDetails : Swift.Codable {
-  public var ssid: Swift.String
-  public var password: Swift.String
-  public init(ssid: Swift.String, password: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
 }
 public enum EndpointName : Swift.String {
   case external
@@ -1427,6 +1714,7 @@ public enum EndpointName : Swift.String {
   case trialStatus
   case subscription
   case eventB2Token
+  case eventSpaceB2Token
   case space
   case spaces
   case spaceInvitationCreate
@@ -1480,7 +1768,12 @@ public enum EndpointName : Swift.String {
   case updateSpaceFeatures
   case products
   case wakeup
-  case wakeupAllBatteryCameras
+  case bitrate
+  case bird
+  case deviceClusters
+  case getActivityZone
+  case dailySummary
+  case userDeletedDailySummaries
   public init?(rawValue: Swift.String)
   public typealias RawValue = Swift.String
   public var rawValue: Swift.String {
@@ -1510,6 +1803,8 @@ public enum QueryItemKey : Swift.String {
   case includeToken
   case country
   case productIds
+  case date
+  case filter
   public init?(rawValue: Swift.String)
   public typealias RawValue = Swift.String
   public var rawValue: Swift.String {
@@ -1535,106 +1830,6 @@ public struct SortItem {
   public var ascending: [IVSDK.QueryItemKey]
   public var descending: [IVSDK.QueryItemKey]
   public init(ascending: [IVSDK.QueryItemKey] = [], descending: [IVSDK.QueryItemKey] = [])
-}
-public enum APIResults {
-  case success(latency: Foundation.TimeInterval, method: Swift.String, endPoint: Swift.String)
-  case failure(latency: Foundation.TimeInterval, method: Swift.String, endPoint: Swift.String)
-}
-public protocol EventLoggerProtocol : AnyObject {
-  func logNetworkEvent(event: IVSDK.APIResults)
-}
-@objc @_inheritsConvenienceInitializers public class EventLogger : ObjectiveC.NSObject {
-  public static let shared: IVSDK.EventLogger
-  weak public var delegate: (any IVSDK.EventLoggerProtocol)?
-  public func logNetworkEvent(event: IVSDK.APIResults)
-  @objc override dynamic public init()
-  @objc deinit
-}
-public protocol DeviceServiceContract {
-  func devices(_ spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.ListDataModel<IVSDK.DeviceModel>>
-  func device(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.DeviceModel>
-  func getDeviceSettings(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.DeviceSettingModel>
-  func getAllDevicesSettings(spaceId: Swift.String, queryItems: [IVSDK.QueryItem]) -> IVSDK.IVPublisher<[IVSDK.DeviceSettingModel]>
-  func updateDeviceSettings(spaceId: Swift.String, deviceId: Swift.String, wakeup: Swift.Bool, request: IVSDK.UpdateDeviceSettingRequestModel?) -> IVSDK.IVPublisher<IVSDK.DeviceSettingModel>
-  func updateDeviceLightSetting(spaceId: Swift.String, deviceId: Swift.String, wakeup: Swift.Bool, request: IVSDK.UpdateDeviceLightSettingRequestModel?) -> IVSDK.IVPublisher<IVSDK.DeviceSettingModel>
-  func updateDevice(spaceId: Swift.String, deviceId: Swift.String, request: IVSDK.UpdateDeviceRequest?) -> IVSDK.IVPublisher<IVSDK.DeviceModel>
-  func deleteDevice(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
-  func getLatestFirmwareVersion(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.FirmwareVersionModel>
-  func getFirmwareUpdatingStatus(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.FirmwareStatusModel>
-  func upgradeFirmware(spaceId: Swift.String, deviceId: Swift.String, request: IVSDK.FirmwareUpdateRequest) -> IVSDK.IVPublisher<Swift.Void>
-  func movePtz(spaceId: Swift.String, deviceId: Swift.String, request: IVSDK.MovePtzRequest) -> IVSDK.IVPublisher<Swift.Void>
-  func resetPtz(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
-  func stopPtz(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
-  func deviceModelInfo(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.DeviceModelInfo>
-  func formatSDCard(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
-  func wakeup(spaceId: Swift.String, deviceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
-  func wakeupDevice(spaceId: Swift.String, deviceId: Swift.String, request: (any Swift.Decodable & Swift.Encodable)?) -> IVSDK.IVPublisher<(any Swift.Decodable & Swift.Encodable)?>
-}
-public protocol FaceServiceContract {
-  func getFaces(spaceId: Swift.String, queryItems: [IVSDK.QueryItem]) -> IVSDK.IVPublisher<IVSDK.FaceListModel>
-  func createFace(spaceId: Swift.String, request: IVSDK.UpdateFaceNameRequest) -> IVSDK.IVPublisher<IVSDK.FaceResponseModel>
-  func updateFace(spaceId: Swift.String, faceId: Swift.String, request: IVSDK.UpdateFaceNameRequest) -> IVSDK.IVPublisher<IVSDK.FaceItemModel>
-  func deleteFace(spaceId: Swift.String, faceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
-  func uploadFaceImage(folderPath: Swift.String, name: Swift.String, data: Foundation.Data, url: Swift.String, authToken: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
-  func updateSpaceFeature(spaceId: Swift.String, request: IVSDK.UpdateSpaceFeatureRequest) -> IVSDK.IVPublisher<Swift.Void>
-}
-public protocol ProMonitoringServiceContract {
-  func getProfile(spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.ProMonitoringModel>
-  func createProfile(spaceId: Swift.String, request: IVSDK.ProMonitoringRequest) -> IVSDK.IVPublisher<Swift.Void>
-  func setupProfile(spaceId: Swift.String, request: IVSDK.ProMonitoringRequest) -> IVSDK.IVPublisher<IVSDK.ProMonitoringModel>
-  func updateProfile(spaceId: Swift.String, request: IVSDK.ProMonitoringRequest) -> IVSDK.IVPublisher<IVSDK.ProMonitoringModel>
-  func updateDevices(spaceId: Swift.String, request: IVSDK.SubscribeDeviceRequest) -> IVSDK.IVPublisher<[IVSDK.ProMonitoringDeviceIDModel]>
-  func armSystem(spaceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
-  func disarmSystem(spaceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
-  func acknowledgeAlarm(spaceId: Swift.String, eventId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
-  func getLiveAlarm(spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.LiveAlarmModel>
-  func getDevices(spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.ProMonitoringModel>
-  func sendOtp(request: IVSDK.PhoneNumber) -> IVSDK.IVPublisher<Swift.Void>
-  func enableTestMode(spaceId: Swift.String, request: IVSDK.ProMonitoringTestModeRequest) -> IVSDK.IVPublisher<IVSDK.ProMonitoringTestModeModel>
-  func dismissEvent(spaceId: Swift.String, request: IVSDK.ProMonitoringAcknowledgementRequest) -> IVSDK.IVPublisher<Swift.Void>
-  func securityLogs(spaceId: Swift.String, queryItems: [IVSDK.QueryItem], sortItem: IVSDK.SortItem?) -> IVSDK.IVPublisher<IVSDK.ListDataModel<IVSDK.SecurityLogsModel>>
-  func updateInviteePhoneNumber(spaceId: Swift.String, request: IVSDK.RespondingPartyPhoneNumberRequest) -> IVSDK.IVPublisher<Swift.Void>
-}
-public protocol SpaceServiceContract {
-  func createSpace(request: IVSDK.CreateSpaceRequest) -> IVSDK.IVPublisher<Swift.Void>
-  func updateSpace(spaceId: Swift.String, request: IVSDK.CreateSpaceRequest) -> IVSDK.IVPublisher<Swift.Void>
-  func spaces() -> IVSDK.IVPublisher<[IVSDK.SpaceModel]>
-  func getSpaceInvitaions() -> IVSDK.IVPublisher<[IVSDK.SharedSpaceModel]>
-  func getDevicesLatestFirmware(spaceId: Swift.String) -> IVSDK.IVPublisher<[IVSDK.LatestFirmwareVersionModel]>
-  func updateSpaceInvitaionResponse(invitationId: Swift.String, request: IVSDK.SpaceInvitaionRequest) -> IVSDK.IVPublisher<Swift.Void>
-  func getSpaceSharedUsers(spaceId: Swift.String) -> IVSDK.IVPublisher<[IVSDK.SpaceSharedUser]>
-  func spaceShareSendInvitation(spaceId: Swift.String, request: IVSDK.SpaceShareUserInviteRequest) -> IVSDK.IVPublisher<Swift.Void>
-  func updateSpaceShareDetail(spaceId: Swift.String, spaceUserId: Swift.String, request: IVSDK.SpaceShareUserInviteRequest) -> IVSDK.IVPublisher<Swift.Void>
-  func updateUserSpaceInvitation(spaceId: Swift.String, invitationId: Swift.String, request: IVSDK.SpaceShareUserInviteRequest) -> IVSDK.IVPublisher<Swift.Void>
-  func cancelSpaceShareInvitation(spaceId: Swift.String, invitationId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
-  func revokeSpaceShareAccess(spaceId: Swift.String, spaceUserId: Swift.String, queryItems: [IVSDK.QueryItem]?) -> IVSDK.IVPublisher<Swift.Void>
-  func connectionCredential(spaceId: Swift.String, queryItems: [IVSDK.QueryItem]) -> IVSDK.IVPublisher<IVSDK.ConnectionCred>
-  func createPairingSessionKey(spaceId: Swift.String, request: IVSDK.PairingSessionKeyRequest) -> IVSDK.IVPublisher<IVSDK.PairingSessionKeyModel>
-  func getPairingSessionStatus(spaceId: Swift.String, sessionKey: Swift.String) -> IVSDK.IVPublisher<IVSDK.PairingSessionStatusModel>
-  func events(spaceId: Swift.String, queryItems: [IVSDK.QueryItem], sortItem: IVSDK.SortItem?) -> IVSDK.IVPublisher<IVSDK.ListDataModel<IVSDK.EventModel>>
-  func event(eventId: Swift.String, spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.EventModel>
-  func deleteEvents(spaceId: Swift.String, request: IVSDK.DeleteEventsResquest) -> IVSDK.IVPublisher<Swift.Void>
-  func getDeletedEvents(spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.DeletedEventsModel>
-  func getB2AuthToken(spaceId: Swift.String) -> IVSDK.IVPublisher<[IVSDK.B2AuthTokenModel]>
-  func getUSATimezones(spaceId: Swift.String) -> IVSDK.IVPublisher<[IVSDK.TimezoneModel]>
-  func getUSAStates(spaceId: Swift.String) -> IVSDK.IVPublisher<[IVSDK.StateModel]>
-  func getTimezone(spaceId: Swift.String, queryItems: [IVSDK.QueryItem]) -> IVSDK.IVPublisher<IVSDK.TimezoneModel>
-  func wakeupAllBatteryCameras(spaceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
-}
-public protocol SubscriptionServiceContract {
-  func getSubscriptions(spaceId: Swift.String) -> IVSDK.IVPublisher<[IVSDK.SubscriptionDataModel]>
-  func manageSubscribedDevices(subscriptionId: Swift.String, deviceIds: IVSDK.SubscribeDeviceRequest) -> IVSDK.IVPublisher<Swift.Void>
-  func checkFreeTrail() -> IVSDK.IVPublisher<IVSDK.FreeTrialResponse>
-  func cancelSubscription(subscriptionId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
-  func activateSubscriptionPreview(spaceId: Swift.String, request: IVSDK.SubscriptionPreviewRequest) -> IVSDK.IVPublisher<Swift.Void>
-  func getSubscriptionPrices(country: Swift.String, productIds: [Swift.String]) -> IVSDK.IVPublisher<[IVSDK.SubscriptionPricePreviewResponse]>
-}
-public protocol SystemServiceContract {
-  func ping() -> IVSDK.IVPublisher<Swift.Void>
-  func speedTest() -> IVSDK.IVPublisher<Foundation.Data>
-  func eventM3U8(url: Swift.String) -> IVSDK.IVPublisher<Foundation.Data>
-  func amazonListing() -> IVSDK.IVPublisher<IVSDK.ShopCameraListDataModel>
-  func appStoreVersion(queryItems: [IVSDK.QueryItem]) -> IVSDK.IVPublisher<IVSDK.AppStoreVersionResultModel>
 }
 public enum Provider : Swift.String {
   case apns
@@ -1669,20 +1864,339 @@ public protocol UserServiceContract {
   func signupWithApple(language: Swift.String) -> IVSDK.IVPublisher<IVSDK.UserModel>
   func getFirebaseToken(needRefresh: Swift.Bool) -> IVSDK.IVPublisher<Swift.String>
 }
-@_hasMissingDesignatedInitializers public class CodableUtils {
-  public static func encode<T>(_ object: T) -> Swift.String? where T : Swift.Encodable
-  public static func decode<T>(_ jsonString: Swift.String, as objectType: T.Type) -> T? where T : Swift.Decodable
-  @objc deinit
+public protocol FaceServiceContract {
+  func getFaces(spaceId: Swift.String, queryItems: [IVSDK.QueryItem]) -> IVSDK.IVPublisher<IVSDK.FaceListModel>
+  func createFace(spaceId: Swift.String, request: IVSDK.UpdateFaceNameRequest) -> IVSDK.IVPublisher<IVSDK.FaceResponseModel>
+  func updateFace(spaceId: Swift.String, faceId: Swift.String, request: IVSDK.UpdateFaceNameRequest) -> IVSDK.IVPublisher<IVSDK.FaceItemModel>
+  func deleteFace(spaceId: Swift.String, faceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
+  func uploadFaceImage(folderPath: Swift.String, name: Swift.String, data: Foundation.Data, url: Swift.String, authToken: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
+  func updateSpaceFeature(spaceId: Swift.String, request: IVSDK.UpdateSpaceFeatureRequest) -> IVSDK.IVPublisher<Swift.Void>
 }
-@_hasMissingDesignatedInitializers public class QRCodeGenerator {
-  public static func generateQRCode(from dict: [Swift.String : Swift.String]) -> UIKit.UIImage?
-  public static func generateQRCode(from string: Swift.String) -> UIKit.UIImage?
-  @objc deinit
+public struct UpdateDeviceRequest : Swift.Codable {
+  public var location: Swift.String?
+  public var name: Swift.String?
+  public var pairingStatus: Swift.String?
+  public init(location: Swift.String? = nil, name: Swift.String? = nil, pairingStatus: Swift.String? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
 }
-extension Swift.String {
-  public var trim: Swift.String {
+public struct UpdateDeviceSettingRequestModel : Swift.Codable {
+  public var id: Swift.String?
+  public var eventSchedulingSettings: IVSDK.EventSchedulingSettingsRequest?
+  public var sensitivityLevel: Swift.String?
+  public var rotationAngle: Swift.Int?
+  public var audioSettings: IVSDK.AudioSettingsRequest?
+  public var fwVersion: Swift.String?
+  public var privacyMode: Swift.Bool?
+  public var eventDetectionSettings: IVSDK.EventDetectionSettingsRequest?
+  public var nightVisionSettings: IVSDK.NightVisionSettingsRequest?
+  public var notificationSettings: IVSDK.NotificationSettingsRequest?
+  public var eventSchedulingEnabled: Swift.Bool?
+  public var motionZonesEnabled: Swift.Bool?
+  public var osdSettings: IVSDK.OsdSettingsRequest?
+  public var motionZone: IVSDK.MotionZoneRequest?
+  public var statusLightEnabled: Swift.Bool?
+  public var ltMode: Swift.String?
+  public var humanTracking: Swift.Bool?
+  public var sdCardSettings: IVSDK.SDCardRequest?
+  public var timezoneSettings: IVSDK.TimezoneSettings?
+  public var hdrEnabled: Swift.Bool?
+  public var eventDuration: Swift.Int?
+  public var alwaysOn: Swift.Bool?
+  public var pirSensitivityLevel: Swift.String?
+  public var rbLtMotion: Swift.Bool?
+  public var fldLtMode: Swift.String?
+  public var guideLampMode: Swift.String?
+  public init(id: Swift.String? = nil, eventSchedulingSettings: IVSDK.EventSchedulingSettingsRequest? = nil, sensitivityLevel: Swift.String? = nil, rotationAngle: Swift.Int? = nil, audioSettings: IVSDK.AudioSettingsRequest? = nil, fwVersion: Swift.String? = nil, privacyMode: Swift.Bool? = nil, eventDetectionSettings: IVSDK.EventDetectionSettingsRequest? = nil, nightVisionSettings: IVSDK.NightVisionSettingsRequest? = nil, notificationSettings: IVSDK.NotificationSettingsRequest? = nil, eventSchedulingEnabled: Swift.Bool? = nil, motionZonesEnabled: Swift.Bool? = nil, osdSettings: IVSDK.OsdSettingsRequest? = nil, motionZone: IVSDK.MotionZoneRequest? = nil, statusLightEnabled: Swift.Bool? = nil, ltMode: Swift.String? = nil, humanTracking: Swift.Bool? = nil, sdCardSettings: IVSDK.SDCardRequest? = nil, timezoneSettings: IVSDK.TimezoneSettings? = nil, hdrEnabled: Swift.Bool? = nil, eventDuration: Swift.Int? = nil, alwaysOn: Swift.Bool? = nil, pirSensitivityLevel: Swift.String? = nil, rbLtMotion: Swift.Bool? = nil, fldLtMode: Swift.String? = nil, guideLampMode: Swift.String? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct UpdateDeviceLightSettingRequestModel : Swift.Codable {
+  public var light: Swift.Bool?
+  public init(light: Swift.Bool? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct EventSchedulingSettingsRequest : Swift.Codable {
+  public var endTime: IVSDK.EventSchedulingTime?
+  public var startTime: IVSDK.EventSchedulingTime?
+  public init(endTime: IVSDK.EventSchedulingTime? = nil, startTime: IVSDK.EventSchedulingTime? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct AudioSettingsRequest : Swift.Codable {
+  public var microphoneEnabled: Swift.Bool?
+  public var volumeLevel: Swift.Double?
+  public var speakerEnabled: Swift.Bool?
+  public init(microphoneEnabled: Swift.Bool? = nil, volumeLevel: Swift.Double? = nil, speakerEnabled: Swift.Bool? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct EventDetectionSettingsRequest : Swift.Codable {
+  public var cloudAi: IVSDK.CloudAiDetections?
+  public var edgeAi: IVSDK.CloudAiDetections?
+  public var coolDown: Swift.String?
+  public init(cloudAi: IVSDK.CloudAiDetections? = nil, edgeAi: IVSDK.CloudAiDetections? = nil, coolDown: Swift.String? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct TimelapseSettingsRequest : Swift.Codable {
+  public var enabled: Swift.Bool
+  public init(enabled: Swift.Bool)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct NightVisionSettingsRequest : Swift.Codable {
+  public var mode: Swift.String?
+  public init(mode: Swift.String? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct NotificationSettingsRequest : Swift.Codable, Swift.Equatable {
+  public var mute: Swift.Bool?
+  public var doorbellMute: Swift.Bool?
+  public init(mute: Swift.Bool? = nil, doorbellMute: Swift.Bool? = nil)
+  public static func == (a: IVSDK.NotificationSettingsRequest, b: IVSDK.NotificationSettingsRequest) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct OsdSettingsRequest : Swift.Codable {
+  public var instaviewLogo: Swift.Bool?
+  public var timeStamp: Swift.Bool?
+  public init(instaviewLogo: Swift.Bool? = nil, timeStamp: Swift.Bool? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct MotionZoneRequest : Swift.Codable {
+  public var type: Swift.String?
+  public var zones: [IVSDK.ActivityZones]?
+  public init(type: Swift.String? = nil, zones: [IVSDK.ActivityZones]? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct FirmwareUpdateRequest : Swift.Codable {
+  public var fwVersion: Swift.String
+  public init(fwVersion: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct MovePtzRequest : Swift.Codable {
+  public var pan: Swift.Int
+  public var tilt: Swift.Int
+  public var nonStop: Swift.Bool
+  public init(pan: Swift.Int, tilt: Swift.Int, nonStop: Swift.Bool)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SDCardRequest : Swift.Codable {
+  public var cvrEnabled: Swift.Bool?
+  public init(cvrEnabled: Swift.Bool? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct CameraModelFeatures : Swift.Codable {
+  public var category: Swift.String?
+  public var properties: IVSDK.CameraModelProperties?
+  public init(category: Swift.String, properties: IVSDK.CameraModelProperties)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public enum PowerSource : Swift.String {
+  case ac
+  case battery
+  case acBattery
+  public init?(rawValue: Swift.String)
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
     get
   }
+}
+public struct CameraModelProperties : Swift.Codable {
+  public enum WiFiBand : Swift.String {
+    case WiFI_2_4_GHz
+    case WiFI_5_GHz
+    public init?(rawValue: Swift.String)
+    public typealias RawValue = Swift.String
+    public var rawValue: Swift.String {
+      get
+    }
+  }
+  public var bluetooth: Swift.Bool?
+  public var bluetoothProp: IVSDK.BluetoothProperty?
+  public var lightbulb: Swift.Bool?
+  public var powerSource: Swift.String?
+  public var ptz: Swift.Bool?
+  public var wifiBand: [Swift.String]?
+  public init(bluetooth: Swift.Bool?, bluetoothProp: IVSDK.BluetoothProperty?, lightbulb: Swift.Bool?, powerSource: Swift.String?, ptz: Swift.Bool?, wifiBand: [Swift.String]?)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct BluetoothProperty : Swift.Codable {
+  public var services: [Swift.String]?
+  public var serviceCharacteristics: [Swift.String]?
+  public init(services: [Swift.String]?, serviceCharacteristics: [Swift.String]?)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public protocol ConnectionStatusDelegate : AnyObject {
+  func streamStarted()
+  func streamEnded()
+  func streamConnecting()
+  func streamFailed()
+  func signalClientDidConnect()
+  func remoteStreamAdded()
+  func dataChannelMessage(_ message: Foundation.Data)
+  func dataChannelOpen(_ open: Swift.Bool)
+}
+@objc public class ConnectionManager : ObjectiveC.NSObject {
+  weak public var connectionStatedelegate: (any IVSDK.ConnectionStatusDelegate)?
+  public var hasRemoteAudio: Swift.Bool {
+    get
+  }
+  public var hasLocalAudio: Swift.Bool {
+    get
+  }
+  public init(credential: IVSDK.ConnectionCred, isPlayback: Swift.Bool)
+  @objc deinit
+}
+extension IVSDK.ConnectionManager {
+  public func startWebRTCConnectionWithIce(deviceId: Swift.String, otherSessionHasAudio: Swift.Bool, completion: @escaping ((any Swift.Error)?) -> Swift.Void)
+}
+extension IVSDK.ConnectionManager {
+  public func startCaptureLocalVideo(view: IVSDK.IVVideoView)
+  public func removeLocalVideo(view: IVSDK.IVVideoView)
+  public func renderRemoteVideo(view: IVSDK.IVVideoView)
+  public func removeRemoteVideo(view: IVSDK.IVVideoView)
+  public func sendOffer(playbackTime: Foundation.TimeInterval?, playbackEndTime: Foundation.TimeInterval?)
+  public func disconnectWebRTC()
+  public func enableRemoteAudio(enable: Swift.Bool, otherSessionHasAudio: Swift.Bool)
+  public func enableLocalAudio(enable: Swift.Bool, otherSessionHasAudio: Swift.Bool)
+  public func sendPlaybackMessage(message: IVSDK.PlaybackMessage)
+}
+public enum APIResults {
+  case success(latency: Foundation.TimeInterval, method: Swift.String, endPoint: Swift.String)
+  case failure(latency: Foundation.TimeInterval, method: Swift.String, endPoint: Swift.String)
+}
+public protocol EventLoggerProtocol : AnyObject {
+  func logNetworkEvent(event: IVSDK.APIResults)
+}
+@objc @_inheritsConvenienceInitializers public class EventLogger : ObjectiveC.NSObject {
+  public static let shared: IVSDK.EventLogger
+  weak public var delegate: (any IVSDK.EventLoggerProtocol)?
+  public func logNetworkEvent(event: IVSDK.APIResults)
+  @objc override dynamic public init()
+  @objc deinit
+}
+public struct UpdateUserRequest : Swift.Codable {
+  public var name: IVSDK.UserName?
+  public var country: Swift.String?
+  public var phoneNumber: IVSDK.PhoneNumber?
+  public var accountSettings: IVSDK.AccountSettings?
+  public var language: Swift.String?
+  public init(name: IVSDK.UserName? = nil, country: Swift.String? = nil, phoneNumber: IVSDK.PhoneNumber? = nil, accountSettings: IVSDK.AccountSettings? = nil, language: Swift.String? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct AccountSettings : Swift.Codable {
+  public var helpDetectionAccuracyEnabled: Swift.Bool?
+  public var promotionalEmailEnabled: Swift.Bool?
+  public init(helpDetectionAccuracyEnabled: Swift.Bool? = nil, promotionalEmailEnabled: Swift.Bool? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct UpdateAPNSTokenRequest : Swift.Codable {
+  public var token: Swift.String?
+  public var appId: Swift.String?
+  public var provider: Swift.String?
+  public init(token: Swift.String? = nil, appId: Swift.String? = nil, provider: Swift.String? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SecurityLogsModel : Swift.Codable, Swift.Equatable {
+  public var id: Swift.String
+  public var spaceId: Swift.String
+  public var type: Swift.String
+  public var createdAt: Swift.Int64
+  public var properties: IVSDK.SecurityProperties?
+  public init(id: Swift.String, spaceId: Swift.String, type: Swift.String, createdAt: Swift.Int64, properties: IVSDK.SecurityProperties?)
+  public static func == (lhs: IVSDK.SecurityLogsModel, rhs: IVSDK.SecurityLogsModel) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SecurityProperties : Swift.Codable {
+  public var id: Swift.String?
+  public var alarmId: Swift.String?
+  public var startTime: Swift.Int64?
+  public var snapshotUrl: Swift.String?
+  public var bucketAlias: Swift.String?
+  public var deviceId: Swift.String?
+  public var deviceName: Swift.String?
+  public var time: Swift.Int64?
+  public var disarmedMethod: Swift.String?
+  public var user: IVSDK.SecurityPropertyUser?
+  public var armTimeOut: Swift.Int64?
+  public var devices: [IVSDK.SecurityPropertyDevice]?
+  public init(id: Swift.String? = nil, alarmId: Swift.String? = nil, startTime: Swift.Int64? = nil, snapshotUrl: Swift.String? = nil, bucketAlias: Swift.String? = nil, deviceId: Swift.String? = nil, deviceName: Swift.String? = nil, time: Swift.Int64? = nil, disarmedMethod: Swift.String? = nil, user: IVSDK.SecurityPropertyUser? = nil, armTimeOut: Swift.Int64? = nil, devices: [IVSDK.SecurityPropertyDevice]? = nil)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SecurityPropertyUser : Swift.Codable {
+  public var id: Swift.String
+  public var name: Swift.String
+  public init(id: Swift.String, name: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SecurityPropertyDevice : Swift.Codable {
+  public var id: Swift.String
+  public var name: Swift.String
+  public var armStatus: Swift.String
+  public init(id: Swift.String, name: Swift.String, armStatus: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public enum ChannelProtocol : Swift.String, Swift.Codable {
+  case https
+  case wss
+  public init?(rawValue: Swift.String)
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public struct ChannelInfo : Swift.Codable {
+  public struct Endpoint : Swift.Codable {
+    public var endpoint: Swift.String
+    public var `protocol`: IVSDK.ChannelProtocol
+    public func encode(to encoder: any Swift.Encoder) throws
+    public init(from decoder: any Swift.Decoder) throws
+  }
+  public var deviceId: Swift.String
+  public var channelArn: Swift.String
+  public var endpoints: [IVSDK.ChannelInfo.Endpoint]
+  public var iceConfig: [IVSDK.IceConfig]
+  public init(deviceId: Swift.String, channelArn: Swift.String, endpoints: [IVSDK.ChannelInfo.Endpoint], iceConfig: [IVSDK.IceConfig])
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct ConnectionCred : Swift.Codable {
+  public var region: Swift.String
+  public var accessKeyId: Swift.String
+  public var secretAccessKey: Swift.String
+  public var sessionToken: Swift.String
+  public var channelInfo: [IVSDK.ChannelInfo]
+  public init(region: Swift.String, accessKey: Swift.String, secretKey: Swift.String, sessionToken: Swift.String, channelInfo: [IVSDK.ChannelInfo])
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct IceConfig : Swift.Codable {
+  public var username: Swift.String
+  public var password: Swift.String
+  public var ttl: Swift.Int
+  public var uris: [Swift.String]
+  public init(userName: Swift.String, password: Swift.String, ttl: Swift.Int, uris: [Swift.String])
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
 }
 @_hasMissingDesignatedInitializers final public class Factory {
   public static let userService: any IVSDK.UserServiceContract
@@ -1694,125 +2208,153 @@ extension Swift.String {
   public static let faceService: any IVSDK.FaceServiceContract
   @objc deinit
 }
-extension Foundation.NSNotification.Name {
-  public static let sessionTokenExpired: Foundation.Notification.Name
-}
-public enum Environment {
-  case production
-  case staging
-  case dev
-  public static func == (a: IVSDK.Environment, b: IVSDK.Environment) -> Swift.Bool
+public enum ConnectionState {
+  case none
+  case initiated
+  case connected
+  case failed
+  public static func == (a: IVSDK.ConnectionState, b: IVSDK.ConnectionState) -> Swift.Bool
   public func hash(into hasher: inout Swift.Hasher)
   public var hashValue: Swift.Int {
     get
   }
 }
-public enum ServerRegion : Swift.String {
-  case us
-  case apac
-  public init?(rawValue: Swift.String)
-  public typealias RawValue = Swift.String
-  public var rawValue: Swift.String {
+final public class LiveViewModel : Combine.ObservableObject, IVSDK.ConnectionStatusDelegate {
+  @Combine.Published @_projectedValueProperty($isConnected) final public var isConnected: Swift.Bool {
     get
+    @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
+    set
+    @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
+    _modify
   }
-}
-@_hasMissingDesignatedInitializers final public class InstaSDK {
-  public static let shared: IVSDK.InstaSDK
-  final public var refreshAuthToken: (() -> Swift.String)?
-  final public func configure(_ clientId: Swift.String = SDKConfig.clientId, partnerId: Swift.String)
-  final public func setRegion(_ region: IVSDK.ServerRegion)
-  final public func setEnvironment(_ environment: IVSDK.Environment)
-  final public func setPartnerId(_ partnerId: Swift.String)
-  final public func setAuthToken(_ token: Swift.String)
+  final public var $isConnected: Combine.Published<Swift.Bool>.Publisher {
+    get
+    @available(iOS 14.0, tvOS 14.0, watchOS 7.0, macOS 11.0, *)
+    set
+  }
+  final public var onConnected: (() -> Swift.Void)?
+  final public var onError: (() -> Swift.Void)?
+  final public var onReconnect: (() -> Swift.Void)?
+  final public var onTimeout: (() -> Swift.Void)?
+  final public var onDataChannelMessage: ((Foundation.Data) -> Swift.Void)?
+  final public var onDataChannelOpen: ((Swift.Bool) -> Swift.Void)?
+  final public var connectionState: IVSDK.ConnectionState
+  final public var retryCount: Swift.Int
+  final public var isRecordingLiveView: Swift.Bool
+  final public var remoteView: IVSDK.VideoView
+  final public var isPlayback: Swift.Bool
+  final public var sdCardPlaybackEnd: Swift.Bool
+  final public var playbackCurrentTime: Swift.Double
+  public init(spaceId: Swift.String, deviceId: Swift.String, batteryCamera: Swift.Bool, spaceService: any IVSDK.SpaceServiceContract, deviceService: any IVSDK.DeviceServiceContract, isPlayback: Swift.Bool = false)
+  final public func remoteStreamAdded()
+  final public func signalClientDidConnect()
+  final public func streamStarted()
+  final public func streamEnded()
+  final public func streamConnecting()
+  final public func streamFailed()
+  final public func dataChannelMessage(_ message: Foundation.Data)
+  final public func dataChannelOpen(_ open: Swift.Bool)
+  final public func seekToTime(time: Foundation.TimeInterval)
+  final public func play()
+  final public func pause()
+  final public func mediaInfo(startTime: Foundation.TimeInterval, endTime: Foundation.TimeInterval)
+  final public func mediaInfoStartTime()
+  final public func connect(localView: IVSDK.IVVideoView? = nil)
+  final public func disconnect(localView: IVSDK.IVVideoView? = nil)
+  final public func enableAudio(value: Swift.Bool)
+  final public func enableMic(value: Swift.Bool)
+  final public func terminateConnection(privacyEnable: Swift.Bool)
+  final public func startRecording(size: CoreFoundation.CGSize?)
+  final public func stopRecording(completion: @escaping (_ recordingUrl: Foundation.URL?) -> Swift.Void)
+  final public func captureSnapshot(size: CoreFoundation.CGSize?, snapshot: @escaping (UIKit.UIImage?) -> ())
+  final public func getLastHourBegininig(date: Foundation.Date) -> Foundation.TimeInterval
+  public typealias ObjectWillChangePublisher = Combine.ObservableObjectPublisher
   @objc deinit
 }
-public struct SDKConfig {
-  public static let clientId: Swift.String
-  public static let sessionId: Swift.String
+public struct ShopCameraListDataModel : Swift.Codable {
+  public var cameras: [IVSDK.ShopCameraModel]
+  public init(cameras: [IVSDK.ShopCameraModel])
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
 }
-public enum IVError : Foundation.LocalizedError {
-  case sdkNotConfigured
-  case emptyPartnerID
-  case noIntenetConnection
-  case nilResponse
-  case generalErrorMessage
-  case accessTokenNotFound
-  case refreshTokenExpired
-  case googleClientIdNotFound
-  case googleUserTokenNotFound
-  case appleNonceGenerationFailed
-  case appleCredentialNotFound
-  case appleUserTokenNotFound
-  case appleUserTokenMalformed
-  case cameraChannelInfoNotFound
-  case invalidCredential
-  case retry(retryError: any Swift.Error, originalError: any Swift.Error)
-  case invalidImageData
-  public var errorDescription: Swift.String? {
-    get
-  }
-}
-public struct APIError : Swift.Decodable, Foundation.LocalizedError {
-  public let code: Swift.String
-  public let message: Swift.String
-  public var errorDescription: Swift.String? {
+public struct ShopCameraModel : Swift.Codable, Swift.Hashable {
+  public var actualPrice: Swift.Double
+  public var category: Swift.String
+  public var currencySymbol: Swift.String
+  public var description: Swift.String
+  public var listingUrl: Swift.String
+  public var name: Swift.String
+  public var rating: Swift.Double
+  public var thumbnail: Swift.String
+  public var offerPrice: Swift.Double?
+  public init(actualPrice: Swift.Double, category: Swift.String, currencySymbol: Swift.String, description: Swift.String, listingUrl: Swift.String, name: Swift.String, rating: Swift.Double, thumbnail: Swift.String, offerPrice: Swift.Double?)
+  public static func == (a: IVSDK.ShopCameraModel, b: IVSDK.ShopCameraModel) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
     get
   }
   public init(from decoder: any Swift.Decoder) throws
 }
-@objc @_hasMissingDesignatedInitializers @_Concurrency.MainActor @preconcurrency public class IVVideoView : UIKit.UIView {
-  @_Concurrency.MainActor @preconcurrency public var connectionReported: Swift.Bool {
+public typealias IVPublisher<T> = Combine.AnyPublisher<IVSDK.ResourceState<T>, Swift.Never>
+public struct Empty : Swift.Decodable {
+  public static func emptyValue() -> IVSDK.Empty
+  public init(from decoder: any Swift.Decoder) throws
+}
+public enum ResourceState<T> {
+  case loading
+  case success(data: T)
+  case error(error: any Swift.Error)
+  public var isLoading: Swift.Bool {
     get
-    set
   }
-  @_Concurrency.MainActor @preconcurrency public var connected: (() -> Swift.Void)?
-  @_Concurrency.MainActor @preconcurrency public var frameRecived: (() -> Swift.Void)?
-  @_Concurrency.MainActor @preconcurrency public var endScrolling: (() -> Swift.Void)?
-  @_Concurrency.MainActor @preconcurrency @objc dynamic public init()
-  @_Concurrency.MainActor @preconcurrency public func captureSnapshot(size: CoreFoundation.CGSize?, snapshot: @escaping (UIKit.UIImage?) -> ())
-  @_Concurrency.MainActor @preconcurrency public func startRecording(size: CoreFoundation.CGSize?)
-  @_Concurrency.MainActor @preconcurrency public func stopRecording(completion: @escaping (_ recordingUrl: Foundation.URL?) -> Swift.Void)
-  @objc deinit
+  public var error: (any Swift.Error)? {
+    get
+  }
+  public var isError: Swift.Bool {
+    get
+  }
+  public var data: T? {
+    get
+  }
 }
-@_Concurrency.MainActor @preconcurrency public struct ViewControllerWrapper : SwiftUI.UIViewControllerRepresentable {
-  @_Concurrency.MainActor @preconcurrency public var viewHeight: CoreFoundation.CGFloat
-  @_Concurrency.MainActor @preconcurrency public var isFullScreen: Swift.Bool
-  @_Concurrency.MainActor @preconcurrency public var content: IVSDK.IVVideoView
-  @_Concurrency.MainActor @preconcurrency public var isExpanded: Swift.Bool
-  @_Concurrency.MainActor @preconcurrency public var endScrolling: (() -> Swift.Void)?
-  @_Concurrency.MainActor @preconcurrency public init(content: IVSDK.IVVideoView, viewHeight: CoreFoundation.CGFloat, isFullScreen: Swift.Bool, isExpanded: Swift.Bool, endScrolling: (() -> Swift.Void)?)
-  @_Concurrency.MainActor @preconcurrency public func makeUIViewController(context: IVSDK.ViewControllerWrapper.Context) -> IVSDK.LiveViewController
-  @_Concurrency.MainActor @preconcurrency public func updateUIViewController(_ uiViewController: IVSDK.LiveViewController, context: IVSDK.ViewControllerWrapper.Context)
-  public typealias Body = Swift.Never
-  public typealias Coordinator = Swift.Void
-  public typealias UIViewControllerType = IVSDK.LiveViewController
+extension IVSDK.ResourceState {
+  public func changeType<X>(handler: (_ data: T) -> IVSDK.IVPublisher<X>) -> IVSDK.IVPublisher<X>
 }
-@objc @_inheritsConvenienceInitializers @_Concurrency.MainActor @preconcurrency public class LiveViewController : UIKit.UIViewController, UIKit.UIScrollViewDelegate {
-  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewDidLoad()
-  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewDidLayoutSubviews()
-  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewWillDisappear(_ animated: Swift.Bool)
-  @_Concurrency.MainActor @preconcurrency @objc public func viewForZooming(in scrollView: UIKit.UIScrollView) -> UIKit.UIView?
-  @_Concurrency.MainActor @preconcurrency @objc public func scrollViewDidEndDragging(_ scrollView: UIKit.UIScrollView, willDecelerate decelerate: Swift.Bool)
-  @_Concurrency.MainActor @preconcurrency @objc public func scrollViewDidEndDecelerating(_ scrollView: UIKit.UIScrollView)
-  @_Concurrency.MainActor @preconcurrency @objc override dynamic public init(nibName nibNameOrNil: Swift.String?, bundle nibBundleOrNil: Foundation.Bundle?)
-  @_Concurrency.MainActor @preconcurrency @objc required dynamic public init?(coder: Foundation.NSCoder)
-  @objc deinit
+extension Combine.Publisher {
+  public func asResult() -> Combine.AnyPublisher<Swift.Result<Self.Output, Self.Failure>, Swift.Never>
 }
-extension IVSDK.PlaybackAction : Swift.Equatable {}
-extension IVSDK.PlaybackAction : Swift.Hashable {}
-extension IVSDK.PlaybackAction : Swift.RawRepresentable {}
-extension IVSDK.ConnectionState : Swift.Equatable {}
-extension IVSDK.ConnectionState : Swift.Hashable {}
-extension IVSDK.VideoView : Swift.Sendable {}
-extension IVSDK.ChannelProtocol : Swift.Equatable {}
-extension IVSDK.ChannelProtocol : Swift.Hashable {}
-extension IVSDK.ChannelProtocol : Swift.RawRepresentable {}
+extension Combine.AnyPublisher where Output == IVSDK.ResourceState<IVSDK.Empty> {
+  public func mapEmpty() -> IVSDK.IVPublisher<Swift.Void>
+}
+public struct DeletedEventsModel : Swift.Codable {
+  public var deletedEventIds: [Swift.String]
+  public init(deletedEventIds: [Swift.String])
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct DeletedTimelapseModel : Swift.Codable {
+  public var deletedTimelapses: [Swift.String]
+  public init(deletedTimelapses: [Swift.String])
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct LiveViewObjectStore {
+  public static func objectFor(spaceId: Swift.String, deviceId: Swift.String, batteryCamera: Swift.Bool, isPlayback: Swift.Bool = false) -> IVSDK.LiveViewModel
+  public static func terminateConnectionForDevice(spaceId: Swift.String, deviceId: Swift.String, privacyEnable: Swift.Bool, deleteCamera: Swift.Bool = false)
+  public static func logout()
+  public static func disconnectOnAppTermination()
+}
 extension IVSDK.DeviceAuthStatus : Swift.Equatable {}
 extension IVSDK.DeviceAuthStatus : Swift.Hashable {}
 extension IVSDK.DeviceAuthStatus : Swift.RawRepresentable {}
 extension IVSDK.DeviceState : Swift.Equatable {}
 extension IVSDK.DeviceState : Swift.Hashable {}
 extension IVSDK.DeviceState : Swift.RawRepresentable {}
+extension IVSDK.NightVisionMode : Swift.RawRepresentable {}
+extension IVSDK.SpotLightMode : Swift.RawRepresentable {}
+extension IVSDK.GuideLightMode : Swift.RawRepresentable {}
+extension IVSDK.FloodLightMode : Swift.RawRepresentable {}
 extension IVSDK.InvitationResponse : Swift.Equatable {}
 extension IVSDK.InvitationResponse : Swift.Hashable {}
 extension IVSDK.InvitationResponse : Swift.RawRepresentable {}
@@ -1834,9 +2376,31 @@ extension IVSDK.ActivityZoneType : Swift.RawRepresentable {}
 extension IVSDK.MotionZoneType : Swift.Equatable {}
 extension IVSDK.MotionZoneType : Swift.Hashable {}
 extension IVSDK.MotionZoneType : Swift.RawRepresentable {}
+extension IVSDK.Environment : Swift.Equatable {}
+extension IVSDK.Environment : Swift.Hashable {}
+extension IVSDK.ServerRegion : Swift.Equatable {}
+extension IVSDK.ServerRegion : Swift.Hashable {}
+extension IVSDK.ServerRegion : Swift.RawRepresentable {}
+extension IVSDK.VideoView : Swift.Sendable {}
+extension IVSDK.Bitrate : Swift.Equatable {}
+extension IVSDK.Bitrate : Swift.Hashable {}
+extension IVSDK.Bitrate : Swift.RawRepresentable {}
+extension IVSDK.ProductType : Swift.Equatable {}
+extension IVSDK.ProductType : Swift.Hashable {}
+extension IVSDK.ProductType : Swift.RawRepresentable {}
+extension IVSDK.BirdImageTag : Swift.Equatable {}
+extension IVSDK.BirdImageTag : Swift.Hashable {}
+extension IVSDK.BirdImageTag : Swift.RawRepresentable {}
 extension IVSDK.EventTag : Swift.Equatable {}
 extension IVSDK.EventTag : Swift.Hashable {}
 extension IVSDK.EventTag : Swift.RawRepresentable {}
+extension IVSDK.SubscriptionType : Swift.Equatable {}
+extension IVSDK.SubscriptionType : Swift.Hashable {}
+extension IVSDK.SubscriptionType : Swift.RawRepresentable {}
+extension IVSDK.SubscribeStatus : Swift.Equatable {}
+extension IVSDK.SubscribeStatus : Swift.Hashable {}
+extension IVSDK.SubscribeStatus : Swift.RawRepresentable {}
+extension IVSDK.ViewControllerWrapper : Swift.Sendable {}
 extension IVSDK.ProMonitoringDeviceState : Swift.Equatable {}
 extension IVSDK.ProMonitoringDeviceState : Swift.Hashable {}
 extension IVSDK.ProMonitoringDeviceState : Swift.RawRepresentable {}
@@ -1846,12 +2410,18 @@ extension IVSDK.ProMonitoringCountry : Swift.RawRepresentable {}
 extension IVSDK.ProMonitoringStatus : Swift.Equatable {}
 extension IVSDK.ProMonitoringStatus : Swift.Hashable {}
 extension IVSDK.ProMonitoringStatus : Swift.RawRepresentable {}
-extension IVSDK.SubscriptionType : Swift.Equatable {}
-extension IVSDK.SubscriptionType : Swift.Hashable {}
-extension IVSDK.SubscriptionType : Swift.RawRepresentable {}
-extension IVSDK.SubscribeStatus : Swift.Equatable {}
-extension IVSDK.SubscribeStatus : Swift.Hashable {}
-extension IVSDK.SubscribeStatus : Swift.RawRepresentable {}
+extension IVSDK.AttributeType : Swift.Equatable {}
+extension IVSDK.AttributeType : Swift.Hashable {}
+extension IVSDK.AttributeType : Swift.RawRepresentable {}
+extension IVSDK.ClustersType : Swift.Equatable {}
+extension IVSDK.ClustersType : Swift.Hashable {}
+extension IVSDK.ClustersType : Swift.RawRepresentable {}
+extension IVSDK.ClustersAttribute : Swift.Equatable {}
+extension IVSDK.ClustersAttribute : Swift.Hashable {}
+extension IVSDK.ClustersAttribute : Swift.RawRepresentable {}
+extension IVSDK.PlaybackAction : Swift.Equatable {}
+extension IVSDK.PlaybackAction : Swift.Hashable {}
+extension IVSDK.PlaybackAction : Swift.RawRepresentable {}
 extension IVSDK.EndpointName : Swift.Equatable {}
 extension IVSDK.EndpointName : Swift.Hashable {}
 extension IVSDK.EndpointName : Swift.RawRepresentable {}
@@ -1861,9 +2431,14 @@ extension IVSDK.QueryItemKey : Swift.RawRepresentable {}
 extension IVSDK.Provider : Swift.Equatable {}
 extension IVSDK.Provider : Swift.Hashable {}
 extension IVSDK.Provider : Swift.RawRepresentable {}
-extension IVSDK.Environment : Swift.Equatable {}
-extension IVSDK.Environment : Swift.Hashable {}
-extension IVSDK.ServerRegion : Swift.Equatable {}
-extension IVSDK.ServerRegion : Swift.Hashable {}
-extension IVSDK.ServerRegion : Swift.RawRepresentable {}
-extension IVSDK.ViewControllerWrapper : Swift.Sendable {}
+extension IVSDK.PowerSource : Swift.Equatable {}
+extension IVSDK.PowerSource : Swift.Hashable {}
+extension IVSDK.PowerSource : Swift.RawRepresentable {}
+extension IVSDK.CameraModelProperties.WiFiBand : Swift.Equatable {}
+extension IVSDK.CameraModelProperties.WiFiBand : Swift.Hashable {}
+extension IVSDK.CameraModelProperties.WiFiBand : Swift.RawRepresentable {}
+extension IVSDK.ChannelProtocol : Swift.Equatable {}
+extension IVSDK.ChannelProtocol : Swift.Hashable {}
+extension IVSDK.ChannelProtocol : Swift.RawRepresentable {}
+extension IVSDK.ConnectionState : Swift.Equatable {}
+extension IVSDK.ConnectionState : Swift.Hashable {}
