@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'IVSDK'
-  s.version      = '2.0.0'
+  s.version      = '2.0.1'
   s.summary      = 'InstaVision iOS SDK.'
   s.description  = 'IVSDK is a networking and live streaming framework, likely designed to handle real-time video transmission, low-latency streaming, and network communication with InstaVision cloud'
   s.homepage     = 'https://instavision.shop'
@@ -14,8 +14,7 @@ Pod::Spec.new do |s|
 
   s.requires_arc = true
   # Add dependencies
-  s.dependency 'Alamofire', '~> 5.4.4'
-  s.dependency 'AlamofireNetworkActivityLogger', '~> 3.4.0'
+  s.dependency 'Alamofire', '~> 5.10.2'
   s.dependency 'Starscream', '~> 4.0.8'
   s.dependency 'Firebase', '~> 11.3.0'
   s.dependency 'FirebaseAuth', '~> 11.3.0'
