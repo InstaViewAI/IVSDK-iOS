@@ -1,10 +1,9 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 6.2 effective-5.10 (swiftlang-6.2.0.19.9 clang-1700.3.19.1)
+// swift-compiler-version: Apple Swift version 6.2.3 effective-5.10 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)
 // swift-module-flags: -target arm64-apple-ios15.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name IVSDK
-// swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.2
+// swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.2.3
 import AVFoundation
 import AVKit
-import AudioToolbox
 import AuthenticationServices
 import CoreImage.CIFilterBuiltins
 import Combine
@@ -38,18 +37,22 @@ public enum CameraConnectionStatus {
 @objc @_inheritsConvenienceInitializers public class BLEManager : ObjectiveC.NSObject, Foundation.ObservableObject {
   public static let instance: IVSDK.BLEManager
   public var bleCameraDID: Swift.String
-  @Combine.Published @_projectedValueProperty($cBManagerState) public var cBManagerState: CoreBluetooth.CBManagerState {
+  #if compiler(>=5.3) && $NonescapableTypes
+  @Combine.Published @_projectedValueProperty($cBManagerState) public var cBManagerState: CoreBluetooth.CBManagerState? {
     get
     @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
     set
     @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
     _modify
   }
-  public var $cBManagerState: Combine.Published<CoreBluetooth.CBManagerState>.Publisher {
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public var $cBManagerState: Combine.Published<CoreBluetooth.CBManagerState?>.Publisher {
     get
     @available(iOS 14.0, tvOS 14.0, watchOS 7.0, macOS 11.0, *)
     set
   }
+  #endif
   @Combine.Published @_projectedValueProperty($wifiList) public var wifiList: [IVSDK.WifiNetwork] {
     get
     @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
@@ -58,18 +61,6 @@ public enum CameraConnectionStatus {
     _modify
   }
   public var $wifiList: Combine.Published<[IVSDK.WifiNetwork]>.Publisher {
-    get
-    @available(iOS 14.0, tvOS 14.0, watchOS 7.0, macOS 11.0, *)
-    set
-  }
-  @Combine.Published @_projectedValueProperty($wifiConnctionStatus) public var wifiConnctionStatus: IVSDK.BLEManager.WiFiConnectionStatus {
-    get
-    @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
-    set
-    @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
-    _modify
-  }
-  public var $wifiConnctionStatus: Combine.Published<IVSDK.BLEManager.WiFiConnectionStatus>.Publisher {
     get
     @available(iOS 14.0, tvOS 14.0, watchOS 7.0, macOS 11.0, *)
     set
@@ -157,7 +148,7 @@ public enum CameraConnectionStatus {
     }
   }
   public func initCBCentralManager()
-  public func startScan(_ forCameraDid: Swift.String, modelId: Swift.String)
+  public func startScan()
   public func stopScan()
   public func disconnect()
   #if compiler(>=5.3) && $NonescapableTypes
@@ -243,36 +234,6 @@ public struct WiFiDetailModel : Swift.Codable {
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
-@_hasMissingDesignatedInitializers public class Event {
-  #if compiler(>=5.3) && $NonescapableTypes
-  public class func parseEvent(event: Swift.String) -> IVSDK.Message?
-  #endif
-  @objc deinit
-}
-extension Swift.String {
-  #if compiler(>=5.3) && $NonescapableTypes
-  public func base64Decoded() -> Swift.String?
-  #endif
-}
-public class Message : Swift.Codable {
-  public init(_ action: Swift.String, _ senderClientId: Swift.String, _ messagePayload: Swift.String)
-  public init(_ action: Swift.String, _ recipientClientId: Swift.String, _ senderClientId: Swift.String, _ messagePayload: Swift.String)
-  public func getAction() -> Swift.String
-  public func setAction(action: Swift.String)
-  public func getRecipientClientId() -> Swift.String
-  public func setRecipientClientId(recipientClientId: Swift.String)
-  public func getSenderClientId() -> Swift.String
-  public func setSenderClientId(senderClientId: Swift.String)
-  public func getMessagePayload() -> Swift.String
-  public func setMessagePayload(messagePayload: Swift.String)
-  public class func createAnswerMessage(sdp: Swift.String, _ recipientClientId: Swift.String) -> IVSDK.Message
-  #if compiler(>=5.3) && $NonescapableTypes
-  public class func createOfferMessage(sdp: Swift.String, senderClientId: Swift.String, playbackTime: Foundation.TimeInterval?, playbackEndTime: Foundation.TimeInterval?) -> IVSDK.Message
-  #endif
-  @objc deinit
-  public func encode(to encoder: any Swift.Encoder) throws
-  required public init(from decoder: any Swift.Decoder) throws
-}
 public struct PlaybackMediaInfo : Swift.Codable {
   public var start: Swift.Int64
   public var end: Swift.Int64
@@ -335,6 +296,29 @@ public struct WakeupMessage : Swift.Codable {
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
+public struct TwoWayCallMessage : Swift.Codable {
+  public enum Action : Swift.String, Swift.Codable {
+    case calling
+    case accepted
+    case onCall
+    case disconnected
+    #if compiler(>=5.3) && $NonescapableTypes
+    public init?(rawValue: Swift.String)
+    #endif
+    public typealias RawValue = Swift.String
+    public var rawValue: Swift.String {
+      get
+    }
+  }
+  public var senderClientId: Swift.String
+  public var type: Swift.String
+  public var action: IVSDK.TwoWayCallMessage.Action
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(action: IVSDK.TwoWayCallMessage.Action, eventId: Swift.String? = nil)
+  #endif
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
 public struct ManualSirenMessage : Swift.Codable {
   public enum Action : Swift.String, Swift.Codable {
     case once
@@ -356,47 +340,6 @@ public struct ManualSirenMessage : Swift.Codable {
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
-public protocol ConnectionStatusDelegate : AnyObject {
-  func streamStarted()
-  func streamEnded()
-  func streamConnecting()
-  func streamFailed()
-  func signalClientDidConnect()
-  func remoteStreamAdded()
-  func dataChannelMessage(_ message: Foundation.Data)
-  func dataChannelOpen(_ open: Swift.Bool)
-}
-@objc public class ConnectionManager : ObjectiveC.NSObject {
-  weak public var connectionStatedelegate: (any IVSDK.ConnectionStatusDelegate)?
-  public var hasRemoteAudio: Swift.Bool {
-    get
-  }
-  public var hasLocalAudio: Swift.Bool {
-    get
-  }
-  public init(credential: IVSDK.ConnectionCred, batteryCam: Swift.Bool, enableLocalAudio: Swift.Bool, enableRemoteAudio: Swift.Bool)
-  @objc deinit
-}
-extension IVSDK.ConnectionManager {
-  #if compiler(>=5.3) && $NonescapableTypes
-  public func startWebRTCConnectionWithIce(deviceId: Swift.String, otherSessionHasAudio: Swift.Bool, completion: @escaping ((any Swift.Error)?) -> Swift.Void)
-  #endif
-}
-extension IVSDK.ConnectionManager {
-  public func startCaptureLocalVideo(view: IVSDK.IVVideoView)
-  public func removeLocalVideo(view: IVSDK.IVVideoView)
-  public func renderRemoteVideo(view: IVSDK.IVVideoView)
-  public func removeRemoteVideo(view: IVSDK.IVVideoView)
-  #if compiler(>=5.3) && $NonescapableTypes
-  public func sendOffer(playbackTime: Foundation.TimeInterval?, playbackEndTime: Foundation.TimeInterval?)
-  #endif
-  public func disconnectWebRTC()
-  public func enableRemoteAudio(enable: Swift.Bool, otherSessionHasAudio: Swift.Bool)
-  public func enableLocalAudio(enable: Swift.Bool, otherSessionHasAudio: Swift.Bool)
-  public func sendPlaybackMessage(message: IVSDK.PlaybackMessage)
-  public func sendWakeupMessage(message: IVSDK.WakeupMessage)
-  public func sendManualSirenMessage(message: IVSDK.ManualSirenMessage)
-}
 public enum ConnectionState {
   case none
   case initiated
@@ -408,7 +351,7 @@ public enum ConnectionState {
     get
   }
 }
-final public class LiveViewModel : Combine.ObservableObject, IVSDK.ConnectionStatusDelegate {
+final public class LiveViewModel : Combine.ObservableObject {
   @Combine.Published @_projectedValueProperty($isConnected) final public var isConnected: Swift.Bool {
     get
     @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
@@ -438,6 +381,7 @@ final public class LiveViewModel : Combine.ObservableObject, IVSDK.ConnectionSta
   }
   #endif
   final public var onConnected: (() -> Swift.Void)?
+  final public var onLiveViewTerminate: (() -> Swift.Void)?
   final public var onError: (() -> Swift.Void)?
   final public var onReconnect: (() -> Swift.Void)?
   final public var onTimeout: (() -> Swift.Void)?
@@ -445,6 +389,8 @@ final public class LiveViewModel : Combine.ObservableObject, IVSDK.ConnectionSta
   final public var onDataChannelOpen: ((Swift.Bool) -> Swift.Void)?
   final public var onDeviceRefresh: ((IVSDK.DeviceModel) -> Swift.Void)?
   final public var onFrameTimeout: (() -> Swift.Void)?
+  final public var onStreamEnded: (() -> Swift.Void)?
+  final public var onStreamFailed: (() -> Swift.Void)?
   final public var connectionState: IVSDK.ConnectionState
   final public var retryCount: Swift.Int
   final public var isRecordingLiveView: Swift.Bool
@@ -452,7 +398,14 @@ final public class LiveViewModel : Combine.ObservableObject, IVSDK.ConnectionSta
   final public var isPlayback: Swift.Bool
   final public var sdCardPlaybackEnd: Swift.Bool
   final public var playbackCurrentTime: Swift.Double
-  public init(spaceId: Swift.String, deviceId: Swift.String, batteryCamera: Swift.Bool, spaceService: any IVSDK.SpaceServiceContract, deviceService: any IVSDK.DeviceServiceContract, isPlayback: Swift.Bool = false, supportRSSI: Swift.Bool = false)
+  final public var isDataChannelOpen: Swift.Bool
+  #if compiler(>=5.3) && $NonescapableTypes
+  @available(*, deprecated, message: "Use init(spaceId:deviceId:wakeup:spaceService:deviceService:isPlayback:supportRSSI:) instead.")
+  convenience public init(spaceId: Swift.String, deviceId: Swift.String, batteryCamera: Swift.Bool, supportsCalling: Swift.Bool = false, spaceService: any IVSDK.SpaceServiceContract, deviceService: any IVSDK.DeviceServiceContract, isPlayback: Swift.Bool = false, supportRSSI: Swift.Bool = false, displayResolution: CoreFoundation.CGSize? = nil)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(spaceId: Swift.String, deviceId: Swift.String, wakeup: Swift.Bool, supportsCalling: Swift.Bool = false, spaceService: any IVSDK.SpaceServiceContract, deviceService: any IVSDK.DeviceServiceContract, isPlayback: Swift.Bool = false, supportRSSI: Swift.Bool = false, displayResolution: CoreFoundation.CGSize? = nil)
+  #endif
   final public func remoteStreamAdded()
   final public func signalClientDidConnect()
   final public func streamStarted()
@@ -468,22 +421,27 @@ final public class LiveViewModel : Combine.ObservableObject, IVSDK.ConnectionSta
   final public func mediaInfoStartTime()
   final public func sendWakeupMessageOnPlaybackStart()
   final public func sendWakeupMessageOnLiveStart()
+  final public func sendTwoWayCallEventId(callEventId: Swift.String)
+  final public func sendAcceptedTwoWayCall()
+  final public func sendDisconnectTwoWayCall()
   final public func startManualSiren()
   final public func stopManualSiren()
   #if compiler(>=5.3) && $NonescapableTypes
-  final public func connect(localView: IVSDK.IVVideoView? = nil)
+  final public func connect(localView: IVSDK.IVVideoView? = nil, autoDisconnectTime: Swift.Double? = nil, playbackEndTime: Foundation.TimeInterval? = nil)
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
   final public func disconnect(localView: IVSDK.IVVideoView? = nil)
   #endif
   final public func enableAudio(value: Swift.Bool)
+  final public func enableLocalVideo(enable: Swift.Bool, localView: IVSDK.IVVideoView)
   final public func enableMic(value: Swift.Bool)
+  final public func switchCamera()
   final public func terminateConnection(privacyEnable: Swift.Bool)
   #if compiler(>=5.3) && $NonescapableTypes
   final public func startRecording(size: CoreFoundation.CGSize?, fileName: Swift.String? = nil)
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
-  final public func stopRecording(completion: @escaping (_ recordingUrl: Foundation.URL?) -> Swift.Void)
+  final public func stopRecording(_ completion: @escaping (Swift.Result<Swift.String, any Swift.Error>) -> Swift.Void)
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
   final public func captureSnapshot(size: CoreFoundation.CGSize?, snapshot: @escaping (UIKit.UIImage?) -> ())
@@ -493,7 +451,13 @@ final public class LiveViewModel : Combine.ObservableObject, IVSDK.ConnectionSta
   @objc deinit
 }
 public struct LiveViewObjectStore {
-  public static func objectFor(spaceId: Swift.String, deviceId: Swift.String, batteryCamera: Swift.Bool, isPlayback: Swift.Bool = false, supportRSSI: Swift.Bool = false) -> IVSDK.LiveViewModel
+  #if compiler(>=5.3) && $NonescapableTypes
+  @available(*, deprecated, message: "Use objectFor(spaceId:deviceId:wakeup:isPlayback:supportRSSI:) instead.")
+  public static func objectFor(spaceId: Swift.String, deviceId: Swift.String, batteryCamera: Swift.Bool, supportsCalling: Swift.Bool = false, isPlayback: Swift.Bool = false, supportRSSI: Swift.Bool = false, displayResolution: CoreFoundation.CGSize? = nil) -> IVSDK.LiveViewModel
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public static func objectFor(spaceId: Swift.String, deviceId: Swift.String, wakeup: Swift.Bool, supportsCalling: Swift.Bool = false, isPlayback: Swift.Bool = false, supportRSSI: Swift.Bool = false, displayResolution: CoreFoundation.CGSize? = nil) -> IVSDK.LiveViewModel
+  #endif
   public static func terminateConnectionForDevice(spaceId: Swift.String, deviceId: Swift.String, privacyEnable: Swift.Bool, deleteCamera: Swift.Bool = false)
   public static func logout()
   public static func disconnectOnAppTermination()
@@ -516,10 +480,6 @@ public struct LiveViewObjectStore {
   @objc deinit
 }
 public typealias IVPublisher<T> = Combine.AnyPublisher<IVSDK.ResourceState<T>, Swift.Never>
-public struct Empty : Swift.Decodable {
-  public static func emptyValue() -> IVSDK.Empty
-  public init(from decoder: any Swift.Decoder) throws
-}
 public enum ResourceState<T> {
   case loading
   case success(data: T)
@@ -548,9 +508,6 @@ extension Combine.Publisher {
   #if compiler(>=5.3) && $NonescapableTypes
   public func asResult() -> Combine.AnyPublisher<Swift.Result<Self.Output, Self.Failure>, Swift.Never>
   #endif
-}
-extension Combine.AnyPublisher where Output == IVSDK.ResourceState<IVSDK.Empty> {
-  public func mapEmpty() -> IVSDK.IVPublisher<Swift.Void>
 }
 public enum Bitrate : Swift.String {
   case auto
@@ -630,9 +587,13 @@ public struct UpdateSpaceFeatureRequest : Swift.Codable {
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
+public enum SessionType {
+  case fourG(deviceId: Swift.String)
+  case other
+}
 public struct PairingSessionKeyRequest : Swift.Codable {
-  public var timezoneSettings: IVSDK.TimezoneSettings
-  public init(timezoneSettings: IVSDK.TimezoneSettings)
+  public let timezoneSettings: IVSDK.TimezoneSettings
+  public init(sessionType: IVSDK.SessionType = .other, timezoneSettings: IVSDK.TimezoneSettings)
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -641,6 +602,48 @@ public struct TimezoneSettings : Swift.Codable, Swift.Equatable {
   public var tzFormat: Swift.String
   public init(id: Swift.String, tzFormat: Swift.String)
   public static func == (lhs: IVSDK.TimezoneSettings, rhs: IVSDK.TimezoneSettings) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct CreatePetProfileRequest : Swift.Codable {
+  public var name: Swift.String?
+  public var species: Swift.String?
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(name: Swift.String? = nil, species: Swift.String? = nil)
+  #endif
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct UpdatePetProfileRequest : Swift.Codable {
+  public var name: Swift.String?
+  public var species: Swift.String?
+  public var profileImageId: Swift.String?
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(name: Swift.String? = nil, species: Swift.String? = nil, profileImageId: Swift.String? = nil)
+  #endif
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct AttachPetImagesRequest : Swift.Codable {
+  public var imageFileNames: [Swift.String]?
+  public var profileImageFileName: Swift.String?
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(imageFileNames: [Swift.String]? = nil, profileImageFileName: Swift.String? = nil)
+  #endif
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct DetachPetImagesRequest : Swift.Codable {
+  public var imageIds: [Swift.String]?
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(imageIds: [Swift.String]? = nil)
+  #endif
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct PetImagesFeedbackRequest : Swift.Codable {
+  public var selectedImageIds: [Swift.String]
+  public init(selectedImageIds: [Swift.String])
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -721,8 +724,9 @@ public struct UpdateDeviceRequest : Swift.Codable {
   public var location: Swift.String?
   public var name: Swift.String?
   public var pairingStatus: Swift.String?
+  public var operatorValue: Swift.String?
   #if compiler(>=5.3) && $NonescapableTypes
-  public init(location: Swift.String? = nil, name: Swift.String? = nil, pairingStatus: Swift.String? = nil)
+  public init(location: Swift.String? = nil, name: Swift.String? = nil, pairingStatus: Swift.String? = nil, operatorValue: Swift.String? = nil)
   #endif
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
@@ -817,8 +821,9 @@ public struct NotificationSettingsRequest : Swift.Codable, Swift.Equatable {
   public var doorbellMute: Swift.Bool?
   public var cameraOfflineMute: Swift.Bool?
   public var birdNotification: IVSDK.BirdNotification?
+  public var callMute: Swift.Bool?
   #if compiler(>=5.3) && $NonescapableTypes
-  public init(mute: Swift.Bool? = nil, doorbellMute: Swift.Bool? = nil, cameraOfflineMute: Swift.Bool? = nil, birdNotification: IVSDK.BirdNotification? = nil)
+  public init(mute: Swift.Bool? = nil, doorbellMute: Swift.Bool? = nil, cameraOfflineMute: Swift.Bool? = nil, birdNotification: IVSDK.BirdNotification? = nil, callMute: Swift.Bool? = nil)
   #endif
   public static func == (a: IVSDK.NotificationSettingsRequest, b: IVSDK.NotificationSettingsRequest) -> Swift.Bool
   public func encode(to encoder: any Swift.Encoder) throws
@@ -861,6 +866,20 @@ public struct SDCardRequest : Swift.Codable {
   #if compiler(>=5.3) && $NonescapableTypes
   public init(cvrEnabled: Swift.Bool? = nil)
   #endif
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct TwoWayCallEventRequest : Swift.Codable {
+  public var deviceId: Swift.String
+  public var startTime: Swift.Int64
+  public init(deviceId: Swift.String, startTime: Swift.Int64)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct TwoWayCallStatusRequest : Swift.Codable {
+  public var status: Swift.String
+  public var endTime: Swift.Int64
+  public init(status: Swift.String, endTime: Swift.Int64)
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -1015,6 +1034,11 @@ public enum AttributeValue : Swift.Codable {
     get
   }
   #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public var dictionaryValue: [Swift.String : IVSDK.AttributeValue]? {
+    get
+  }
+  #endif
 }
 public struct UpdateClusterRequestModel : Swift.Codable {
   public var clusterId: Swift.String
@@ -1025,11 +1049,11 @@ public struct UpdateClusterRequestModel : Swift.Codable {
   public init(from decoder: any Swift.Decoder) throws
 }
 public struct UpdateClusterAttributeRequestModel : Swift.Codable {
-  public var type: Swift.String
+  public var type: Swift.String?
   public var value: IVSDK.AttributeValue
   public var attributeId: Swift.String?
   #if compiler(>=5.3) && $NonescapableTypes
-  public init(type: Swift.String, value: IVSDK.AttributeValue, attributeId: Swift.String? = nil)
+  public init(type: Swift.String? = nil, value: IVSDK.AttributeValue, attributeId: Swift.String? = nil)
   #endif
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
@@ -1048,6 +1072,7 @@ public enum ClustersType : Swift.String, Swift.CaseIterable {
   case motionSensorSensitivityLevel
   case securityState
   case hdrEnable
+  case chimeType
   case nightVision
   case audioSettings
   case rotationalAngle
@@ -1067,6 +1092,10 @@ public enum ClustersType : Swift.String, Swift.CaseIterable {
   case sdCardSettings
   case manualSiren
   case wifiRSSI
+  case radarZone
+  case videoCall
+  case hardwareConfigurations
+  case fourGProperties
   public var clusterId: Swift.String {
     get
   }
@@ -1097,6 +1126,7 @@ public enum ClustersAttribute : Swift.String, Swift.CaseIterable {
   case privacyMode
   case motionDetectionEnable
   case motionDetectionCoolDownPeriod
+  case chimeSettings
   case nightVisionSettings
   case motionZonesEnabled
   case osdSettingsInstaviewLogo
@@ -1125,6 +1155,11 @@ public enum ClustersAttribute : Swift.String, Swift.CaseIterable {
   case securityState
   case manualSiren
   case wifiRSSI
+  case radarZone
+  case twoWayCall
+  case hardwareConfigurations
+  case dataOff
+  case lowDataMode
   public var attributeId: Swift.String {
     get
   }
@@ -1148,6 +1183,20 @@ extension IVSDK.CameraClustersModel {
   public mutating func updateAttributeValueForCluster(clusterType: IVSDK.ClustersType, attributeType: IVSDK.ClustersAttribute, value: IVSDK.AttributeValue)
   public mutating func updateCluster(cluster: IVSDK.Cluster)
   public func getActivityZones() -> [Swift.Int]
+  public func getRadarDetectionZoneSegments() -> [Swift.Int]
+  #if compiler(>=5.3) && $NonescapableTypes
+  public var sensorResolution: CoreFoundation.CGSize? {
+    get
+  }
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public var displayResolution: CoreFoundation.CGSize? {
+    get
+  }
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getRadarDetectionZoneLevel() -> Swift.String?
+  #endif
 }
 extension IVSDK.CameraClustersModel {
   public var supportsPrivacyMode: Swift.Bool {
@@ -1256,6 +1305,18 @@ extension IVSDK.CameraClustersModel {
     get
   }
   public var supportsSecurityState: Swift.Bool {
+    get
+  }
+  public var supportsRadarZone: Swift.Bool {
+    get
+  }
+  public var supportsVideoCall: Swift.Bool {
+    get
+  }
+  public var supportsHardwareConfigrations: Swift.Bool {
+    get
+  }
+  public var supportsChime: Swift.Bool {
     get
   }
 }
@@ -1371,6 +1432,11 @@ extension IVSDK.CameraClustersModel {
   }
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
+  public var chimeTypeOptionsList: [IVSDK.DisplayLabel]? {
+    get
+  }
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   public var cameraLightOptionsList: [IVSDK.DisplayLabel]? {
     get
   }
@@ -1382,6 +1448,11 @@ extension IVSDK.CameraClustersModel {
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
   public var guideLightModeOptionsList: [IVSDK.DisplayLabel]? {
+    get
+  }
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public var chimeType: Swift.String? {
     get
   }
   #endif
@@ -1448,6 +1519,16 @@ extension IVSDK.CameraClustersModel {
     get
   }
   #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public var isDataOff: Swift.Bool? {
+    get
+  }
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public var isLowDataModeEnable: Swift.Bool? {
+    get
+  }
+  #endif
 }
 extension IVSDK.Cluster {
   #if compiler(>=5.3) && $NonescapableTypes
@@ -1486,6 +1567,9 @@ extension IVSDK.DeviceCloudSettings {
   public var bird: Swift.Bool {
     get
   }
+  public var pet: Swift.Bool {
+    get
+  }
   public var supportEdgeAiPerson: Swift.Bool {
     get
   }
@@ -1493,6 +1577,9 @@ extension IVSDK.DeviceCloudSettings {
     get
   }
   public var supportEdgeAiAnimal: Swift.Bool {
+    get
+  }
+  public var supportEdgeAiPet: Swift.Bool {
     get
   }
   public var supportEdgeAiBird: Swift.Bool {
@@ -1505,6 +1592,9 @@ extension IVSDK.DeviceCloudSettings {
     get
   }
   public var supportCloudAiAnimal: Swift.Bool {
+    get
+  }
+  public var supportCloudAiPet: Swift.Bool {
     get
   }
   public var supportCloudAiBird: Swift.Bool {
@@ -1523,6 +1613,9 @@ extension IVSDK.DeviceCloudSettings {
     get
   }
   public var supportMotion: Swift.Bool {
+    get
+  }
+  public var supportOtaSchedule: Swift.Bool {
     get
   }
 }
@@ -1559,12 +1652,13 @@ public struct CameraModelProperties : Swift.Codable {
   }
   public var bluetooth: Swift.Bool?
   public var bluetoothProp: IVSDK.BluetoothProperty?
+  public var fourGProps: IVSDK.FourGProperty?
   public var lightbulb: Swift.Bool?
   public var powerSource: Swift.String?
   public var ptz: Swift.Bool?
   public var wifiBand: [Swift.String]?
   #if compiler(>=5.3) && $NonescapableTypes
-  public init(bluetooth: Swift.Bool?, bluetoothProp: IVSDK.BluetoothProperty?, lightbulb: Swift.Bool?, powerSource: Swift.String?, ptz: Swift.Bool?, wifiBand: [Swift.String]?)
+  public init(bluetooth: Swift.Bool?, bluetoothProp: IVSDK.BluetoothProperty?, fourGProps: IVSDK.FourGProperty?, lightbulb: Swift.Bool?, powerSource: Swift.String?, ptz: Swift.Bool?, wifiBand: [Swift.String]?)
   #endif
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
@@ -1575,6 +1669,13 @@ public struct BluetoothProperty : Swift.Codable {
   #if compiler(>=5.3) && $NonescapableTypes
   public init(services: [Swift.String]?, serviceCharacteristics: [Swift.String]?)
   #endif
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct FourGProperty : Swift.Codable {
+  public var enabled: Swift.Bool
+  public var provider: Swift.String
+  public init(enabled: Swift.Bool, provider: Swift.String)
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -1667,6 +1768,33 @@ public enum DeviceState : Swift.String {
   public init?(rawValue: Swift.String)
   #endif
   public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public enum DeviceConnectionState : Swift.String {
+  case connected
+  case disconnected
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.String)
+  #endif
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public enum DoorbellChimeType : Swift.String, Swift.CaseIterable, Swift.Hashable {
+  case mechanicalType
+  case electronicType
+  case defaultType
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.String)
+  #endif
+  public typealias AllCases = [IVSDK.DoorbellChimeType]
+  public typealias RawValue = Swift.String
+  nonisolated public static var allCases: [IVSDK.DoorbellChimeType] {
+    get
+  }
   public var rawValue: Swift.String {
     get
   }
@@ -1814,6 +1942,7 @@ public struct DeviceStateModel : Swift.Codable {
   public var wifiName: Swift.String
   public var ipAddr: Swift.String
   public var firmwareVersion: Swift.String
+  public var certifiedFirmwareVersion: Swift.String?
   public var privacyMode: Swift.Bool?
   public var snapshotUrl: Swift.String
   public var light: Swift.Bool?
@@ -1824,9 +1953,16 @@ public struct DeviceStateModel : Swift.Codable {
   public var batteryPercentage: CoreFoundation.CGFloat?
   public var rssi: Swift.String?
   public var charging: Swift.Bool?
+  public var subDeviceState: IVSDK.SubDeviceState?
   #if compiler(>=5.3) && $NonescapableTypes
-  public init(status: Swift.String, wifiName: Swift.String, ipAddr: Swift.String, firmwareVersion: Swift.String, privacyMode: Swift.Bool?, snapshotUrl: Swift.String, light: Swift.Bool?, sdCard: IVSDK.SdCard, securityArmed: Swift.Bool, batteryPercentage: CoreFoundation.CGFloat?, rssi: Swift.String? = nil, charging: Swift.Bool? = nil)
+  public init(status: Swift.String, wifiName: Swift.String, ipAddr: Swift.String, firmwareVersion: Swift.String, certifiedFirmwareVersion: Swift.String? = nil, privacyMode: Swift.Bool?, snapshotUrl: Swift.String, light: Swift.Bool?, sdCard: IVSDK.SdCard, securityArmed: Swift.Bool, batteryPercentage: CoreFoundation.CGFloat?, rssi: Swift.String? = nil, charging: Swift.Bool? = nil, subDeviceState: IVSDK.SubDeviceState?)
   #endif
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SubDeviceState : Swift.Codable {
+  public var connectionState: Swift.String
+  public init(connectionState: Swift.String)
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -1852,7 +1988,9 @@ public struct DeviceModel : Swift.Codable, Swift.Equatable {
   public var modelProductType: Swift.String
   public var clusterGroupVersion: Swift.String?
   public var powerSource: Swift.String?
+  public var isMcuSupported: Swift.Bool
   public var clusters: [IVSDK.Cluster]?
+  public var fourG: IVSDK.FourGInfo?
   public var displayName: Swift.String {
     get
   }
@@ -1860,7 +1998,7 @@ public struct DeviceModel : Swift.Codable, Swift.Equatable {
     get
   }
   #if compiler(>=5.3) && $NonescapableTypes
-  public init(id: Swift.String, name: Swift.String, spaceId: Swift.String, deviceState: IVSDK.DeviceStateModel, pairingStatus: Swift.String, activationDate: Swift.Int64, modelName: Swift.String, modelId: Swift.String, variantName: Swift.String?, nvrCredentials: IVSDK.NVRCredentials? = nil, deviceType: Swift.String? = nil, modelProductType: Swift.String, clusterGroupVersion: Swift.String? = "v0", powerSource: Swift.String? = nil, clusters: [IVSDK.Cluster]? = nil)
+  public init(id: Swift.String, name: Swift.String, spaceId: Swift.String, deviceState: IVSDK.DeviceStateModel, pairingStatus: Swift.String, activationDate: Swift.Int64, modelName: Swift.String, modelId: Swift.String, variantName: Swift.String?, nvrCredentials: IVSDK.NVRCredentials? = nil, deviceType: Swift.String? = nil, modelProductType: Swift.String, clusterGroupVersion: Swift.String? = "v0", powerSource: Swift.String? = nil, isMcuSupported: Swift.Bool, clusters: [IVSDK.Cluster]? = nil)
   #endif
   public static func == (lhs: IVSDK.DeviceModel, rhs: IVSDK.DeviceModel) -> Swift.Bool
   public func encode(to encoder: any Swift.Encoder) throws
@@ -1913,8 +2051,9 @@ public struct NotificationSettings : Swift.Codable, Swift.Equatable {
   public var doorbellMute: Swift.Bool?
   public var cameraOfflineMute: Swift.Bool?
   public var birdNotification: IVSDK.BirdNotification?
+  public var callMute: Swift.Bool?
   #if compiler(>=5.3) && $NonescapableTypes
-  public init(mute: Swift.Bool?, doorbellMute: Swift.Bool?, cameraOfflineMute: Swift.Bool? = nil, birdNotification: IVSDK.BirdNotification? = nil)
+  public init(mute: Swift.Bool?, doorbellMute: Swift.Bool?, cameraOfflineMute: Swift.Bool? = nil, birdNotification: IVSDK.BirdNotification? = nil, callMute: Swift.Bool? = nil)
   #endif
   public static func == (lhs: IVSDK.NotificationSettings, rhs: IVSDK.NotificationSettings) -> Swift.Bool
   public func encode(to encoder: any Swift.Encoder) throws
@@ -1939,14 +2078,24 @@ public struct TimelapseSettings : Swift.Codable, Swift.Equatable {
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
+public struct OTASchedule : Swift.Codable, Swift.Equatable {
+  public var enabled: Swift.Bool?
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(enabled: Swift.Bool?)
+  #endif
+  public static func == (a: IVSDK.OTASchedule, b: IVSDK.OTASchedule) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
 public struct DeviceCloudSettings : Swift.Codable, Swift.Equatable {
   public var motion: Swift.Bool?
   public var edgeAiDetections: IVSDK.CloudAiDetections?
   public var cloudAiDetections: IVSDK.CloudAiDetections?
   public var notifications: IVSDK.NotificationSettings?
   public var timelapse: IVSDK.TimelapseSettings?
+  public var otaSchedule: IVSDK.OTASchedule?
   #if compiler(>=5.3) && $NonescapableTypes
-  public init(motion: Swift.Bool? = nil, edgeAiDetections: IVSDK.CloudAiDetections? = nil, cloudAiDetections: IVSDK.CloudAiDetections? = nil, notifications: IVSDK.NotificationSettings? = nil, timelapse: IVSDK.TimelapseSettings? = nil)
+  public init(motion: Swift.Bool? = nil, edgeAiDetections: IVSDK.CloudAiDetections? = nil, cloudAiDetections: IVSDK.CloudAiDetections? = nil, notifications: IVSDK.NotificationSettings? = nil, timelapse: IVSDK.TimelapseSettings? = nil, otaSchedule: IVSDK.OTASchedule? = nil)
   #endif
   public static func == (a: IVSDK.DeviceCloudSettings, b: IVSDK.DeviceCloudSettings) -> Swift.Bool
   public func encode(to encoder: any Swift.Encoder) throws
@@ -1957,8 +2106,9 @@ public struct CloudAiDetections : Swift.Codable, Swift.Equatable {
   public var vehicle: Swift.Bool?
   public var animal: Swift.Bool?
   public var bird: Swift.Bool?
+  public var pet: Swift.Bool?
   #if compiler(>=5.3) && $NonescapableTypes
-  public init(person: Swift.Bool? = nil, vehicle: Swift.Bool? = nil, animal: Swift.Bool? = nil, bird: Swift.Bool? = nil)
+  public init(person: Swift.Bool? = nil, vehicle: Swift.Bool? = nil, animal: Swift.Bool? = nil, bird: Swift.Bool? = nil, pet: Swift.Bool? = nil)
   #endif
   public static func == (lhs: IVSDK.CloudAiDetections, rhs: IVSDK.CloudAiDetections) -> Swift.Bool
   public func encode(to encoder: any Swift.Encoder) throws
@@ -2110,10 +2260,11 @@ public struct DeviceModelInfo : Swift.Codable {
   public var did: Swift.String
   public var modelId: Swift.String
   public var modelName: Swift.String
+  public var productType: Swift.String
   public var variantName: Swift.String?
   public var modelDetails: IVSDK.CameraModelFeatures?
   #if compiler(>=5.3) && $NonescapableTypes
-  public init(did: Swift.String, modelId: Swift.String, modelName: Swift.String, variantName: Swift.String?, modelDetails: IVSDK.CameraModelFeatures?)
+  public init(did: Swift.String, modelId: Swift.String, modelName: Swift.String, productType: Swift.String, variantName: Swift.String?, modelDetails: IVSDK.CameraModelFeatures?)
   #endif
   public var displayModelName: Swift.String {
     get
@@ -2143,6 +2294,21 @@ public struct ActivityZoneDevice : Swift.Codable {
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
+public struct TwoWayCallEventModel : Swift.Codable {
+  public var id: Swift.String
+  public init(id: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct FourGInfo : Swift.Codable {
+  public var iccid: Swift.String
+  public var imei: Swift.String
+  public var operatorValue: Swift.String
+  public var provider: Swift.String
+  public init(iccid: Swift.String, imei: Swift.String, operatorValue: Swift.String, provider: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
 extension IVSDK.DeviceModel {
   public var supportPrivacyMode: Swift.Bool {
     get
@@ -2163,6 +2329,22 @@ extension IVSDK.DeviceModel {
     get
   }
   public var supportsPTZTilt: Swift.Bool {
+    get
+  }
+  public var supportsHardwareConfigrations: Swift.Bool {
+    get
+  }
+  #if compiler(>=5.3) && $NonescapableTypes
+  public var sensorResolution: CoreFoundation.CGSize? {
+    get
+  }
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public var displayResolution: CoreFoundation.CGSize? {
+    get
+  }
+  #endif
+  public var sensorAspectRatio: CoreFoundation.CGFloat {
     get
   }
   #if compiler(>=5.3) && $NonescapableTypes
@@ -2191,11 +2373,29 @@ extension IVSDK.DeviceModel {
   public var supportBitrate: Swift.Bool {
     get
   }
+  public var supportsVideoCall: Swift.Bool {
+    get
+  }
   #if compiler(>=5.3) && $NonescapableTypes
   public func getClusterFor(clusterType: IVSDK.ClustersType) -> IVSDK.Cluster?
   #endif
   public mutating func updateAttributeValueForCluster(clusterId: Swift.String, attributeId: Swift.String, value: IVSDK.AttributeValue)
   public mutating func updateAttributeValueForCluster(clusterType: IVSDK.ClustersType, attributeType: IVSDK.ClustersAttribute, value: IVSDK.AttributeValue)
+  public var is4GCamera: Swift.Bool {
+    get
+  }
+  public var supportDataOff: Swift.Bool {
+    get
+  }
+  public var supportLowDataMode: Swift.Bool {
+    get
+  }
+  public var dataOff: Swift.Bool {
+    get
+  }
+  public var lowDataModeEnable: Swift.Bool {
+    get
+  }
 }
 extension IVSDK.DeviceModel {
   #if compiler(>=5.3) && $NonescapableTypes
@@ -2235,8 +2435,10 @@ public struct EventModel : Swift.Codable, Swift.Identifiable, Swift.Equatable {
   public var timerEndTime: Swift.Int64?
   public var birds: [IVSDK.Bird]?
   public var accurate: Swift.Bool?
+  public var call: IVSDK.CallEvent?
+  public var pets: [IVSDK.PetModel]?
   #if compiler(>=5.3) && $NonescapableTypes
-  public init(id: Swift.String, spaceId: Swift.String, deviceId: Swift.String, deviceName: Swift.String? = nil, eventType: Swift.String, startTime: Swift.Int64, endTime: Swift.Int64? = nil, expireAt: Swift.Int64? = nil, snapshotUrl: Swift.String? = nil, videoUrl: Swift.String? = nil, tags: [Swift.String], faceIds: [Swift.String]? = [], faceNames: [Swift.String]? = [], bucketName: Swift.String, bucketKey: Swift.String? = nil, isDownLoading: Swift.Bool? = nil, contextBody: Swift.String? = nil, timerDuration: Swift.Int? = nil, timerEndTime: Swift.Int64? = nil, birds: [IVSDK.Bird]? = nil, accurate: Swift.Bool? = nil)
+  public init(id: Swift.String, spaceId: Swift.String, deviceId: Swift.String, deviceName: Swift.String? = nil, eventType: Swift.String, startTime: Swift.Int64, endTime: Swift.Int64? = nil, expireAt: Swift.Int64? = nil, snapshotUrl: Swift.String? = nil, videoUrl: Swift.String? = nil, tags: [Swift.String], faceIds: [Swift.String]? = [], faceNames: [Swift.String]? = [], bucketName: Swift.String, bucketKey: Swift.String? = nil, isDownLoading: Swift.Bool? = nil, contextBody: Swift.String? = nil, timerDuration: Swift.Int? = nil, timerEndTime: Swift.Int64? = nil, birds: [IVSDK.Bird]? = nil, accurate: Swift.Bool? = nil, call: IVSDK.CallEvent? = nil, pets: [IVSDK.PetModel]? = nil)
   #endif
   public static func == (a: IVSDK.EventModel, b: IVSDK.EventModel) -> Swift.Bool
   public typealias ID = Swift.String
@@ -2251,6 +2453,7 @@ public enum EventTag : Swift.String, Swift.CaseIterable {
   case alarm
   case doorbellRing
   case bird
+  case pet
   #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.String)
   #endif
@@ -2276,6 +2479,17 @@ public struct Bird : Swift.Codable, Swift.Equatable, Swift.Identifiable {
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
+public struct CallEvent : Swift.Codable, Swift.Equatable {
+  public var status: Swift.String
+  public var initiatedBy: Swift.String
+  public var callUserName: Swift.String?
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(status: Swift.String, initiatedBy: Swift.String, callUserName: Swift.String? = nil)
+  #endif
+  public static func == (a: IVSDK.CallEvent, b: IVSDK.CallEvent) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
 public struct DailySummaryTagInfo : Swift.Codable, Swift.Hashable {
   public var doorbell: Swift.Int?
   public var person: Swift.Int?
@@ -2283,8 +2497,9 @@ public struct DailySummaryTagInfo : Swift.Codable, Swift.Hashable {
   public var animal: Swift.Int?
   public var bird: Swift.Int?
   public var alarm: Swift.Int?
+  public var pet: Swift.Int?
   #if compiler(>=5.3) && $NonescapableTypes
-  public init(doorbell: Swift.Int? = nil, person: Swift.Int? = nil, vehicle: Swift.Int? = nil, animal: Swift.Int? = nil, bird: Swift.Int? = nil, alarm: Swift.Int? = nil)
+  public init(doorbell: Swift.Int? = nil, person: Swift.Int? = nil, vehicle: Swift.Int? = nil, animal: Swift.Int? = nil, bird: Swift.Int? = nil, alarm: Swift.Int? = nil, pet: Swift.Int? = nil)
   #endif
   public static func == (a: IVSDK.DailySummaryTagInfo, b: IVSDK.DailySummaryTagInfo) -> Swift.Bool
   public func encode(to encoder: any Swift.Encoder) throws
@@ -2321,8 +2536,9 @@ public struct DailySummaryModel : Swift.Codable, Swift.Hashable {
   public var snapshotUrl: Swift.String?
   public var video: IVSDK.VideoInfo?
   public var tagCount: IVSDK.DailySummaryTagInfo?
+  public var petIds: [Swift.String]?
   #if compiler(>=5.3) && $NonescapableTypes
-  public init(id: Swift.String, spaceId: Swift.String, deviceId: Swift.String, deviceName: Swift.String, title: Swift.String, subtitle: Swift.String, date: Swift.Int64, expireAt: Swift.Int64? = nil, bucketName: Swift.String? = nil, snapshotUrl: Swift.String? = nil, video: IVSDK.VideoInfo? = nil, tagCount: IVSDK.DailySummaryTagInfo?)
+  public init(id: Swift.String, spaceId: Swift.String, deviceId: Swift.String, deviceName: Swift.String, title: Swift.String, subtitle: Swift.String, date: Swift.Int64, expireAt: Swift.Int64? = nil, bucketName: Swift.String? = nil, snapshotUrl: Swift.String? = nil, video: IVSDK.VideoInfo? = nil, tagCount: IVSDK.DailySummaryTagInfo?, petIds: [Swift.String]? = nil)
   #endif
   public static func == (a: IVSDK.DailySummaryModel, b: IVSDK.DailySummaryModel) -> Swift.Bool
   public func encode(to encoder: any Swift.Encoder) throws
@@ -2335,6 +2551,32 @@ public struct DailySummaryModel : Swift.Codable, Swift.Hashable {
 public struct ListDailySummaryModel : Swift.Codable {
   public var timelapses: [IVSDK.DailySummaryModel]
   public init(timelapses: [IVSDK.DailySummaryModel])
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public enum PetActivity : Swift.String, Swift.CaseIterable {
+  case walking
+  case eating
+  case sleeping
+  case littering
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.String)
+  #endif
+  public typealias AllCases = [IVSDK.PetActivity]
+  public typealias RawValue = Swift.String
+  nonisolated public static var allCases: [IVSDK.PetActivity] {
+    get
+  }
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public struct PetModel : Swift.Codable, Swift.Equatable, Swift.Identifiable {
+  public var id: Swift.String
+  public var activities: [Swift.String]
+  public init(id: Swift.String, activities: [Swift.String])
+  public static func == (a: IVSDK.PetModel, b: IVSDK.PetModel) -> Swift.Bool
+  public typealias ID = Swift.String
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -2393,11 +2635,142 @@ public struct PairingSessionKeyModel : Swift.Codable {
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
+public struct ValidateSimModel : Swift.Codable {
+  public var iccid: Swift.String
+  public var isValid: Swift.Bool
+  public init(iccid: Swift.String, isValid: Swift.Bool)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct OperatorsListModel : Swift.Codable {
+  public var data: [Swift.String]
+  public init(data: [Swift.String])
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct PoolDataModel : Swift.Codable {
+  public var totalDataMb: Swift.Int64
+  public var remainingDataMb: Swift.Int64
+  public init(totalDataMb: Swift.Int64, remainingDataMb: Swift.Int64)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public enum DataPassStatus : Swift.String {
+  case initialise
+  case allocated
+  case active
+  case toBeActivated
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.String)
+  #endif
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public enum PurchaseType : Swift.String {
+  case recurring
+  case manualTopUp
+  case autoTopUp
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.String)
+  #endif
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public struct DataPassModel : Swift.Codable {
+  public var id: Swift.String
+  public var productId: Swift.String
+  public var purchaseId: Swift.String
+  public var skuId: Swift.String
+  public var skuName: Swift.String
+  public var skuCategory: Swift.String
+  public var status: Swift.String
+  public var skuLevel: Swift.Int
+  public var subscriptionCycle: Swift.Int
+  public var purchaseType: Swift.String
+  public var totalDataMb: Swift.Int64
+  public var expiryTime: Swift.Int64?
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
 public struct PairingSessionStatusModel : Swift.Codable {
   public var deviceId: Swift.String
   public var expired: Swift.Bool
   public var status: Swift.String
-  public init(deviceId: Swift.String, expired: Swift.Bool, status: Swift.String)
+  public var login: IVSDK.PairingSessionStatusTypeModel?
+  public var pairing: IVSDK.PairingSessionStatusTypeModel?
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(deviceId: Swift.String, expired: Swift.Bool, status: Swift.String, login: IVSDK.PairingSessionStatusTypeModel?, pairing: IVSDK.PairingSessionStatusTypeModel?)
+  #endif
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct PairingSessionStatusTypeModel : Swift.Codable {
+  public var status: Swift.String
+  public var errorCode: Swift.String?
+  public var reason: Swift.String?
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(status: Swift.String, errorCode: Swift.String? = nil, reason: Swift.String? = nil)
+  #endif
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public enum PetType : Swift.String {
+  case cat
+  case dog
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.String)
+  #endif
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public struct PetProfile : Swift.Codable {
+  public var id: Swift.String
+  public var spaceId: Swift.String
+  public var name: Swift.String
+  public var species: Swift.String
+  public var profileImage: IVSDK.ImageDetails?
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(id: Swift.String, spaceId: Swift.String, name: Swift.String, species: Swift.String, profileImage: IVSDK.ImageDetails? = nil)
+  #endif
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct PetProfileDetail : Swift.Codable {
+  public var id: Swift.String
+  public var spaceId: Swift.String
+  public var name: Swift.String
+  public var species: Swift.String
+  public var profileImage: IVSDK.ImageDetails?
+  public var images: [IVSDK.ImageDetails]?
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct RecommendedPet : Swift.Codable {
+  public var images: [IVSDK.ImageDetails]?
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct ImageDetails : Swift.Codable {
+  public var id: Swift.String
+  public var imageUrl: Swift.String
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct ListPetProfilesResponse : Swift.Codable {
+  public var petProfiles: [IVSDK.PetProfile]
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct GetUploadUrlResponse : Swift.Codable {
+  public var authToken: Swift.String
+  public var uploadUrl: Swift.String
+  public var imageIds: [Swift.String]
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -2613,7 +2986,10 @@ public struct SecurityPropertyDevice : Swift.Codable {
   public var id: Swift.String
   public var name: Swift.String
   public var armStatus: Swift.String
-  public init(id: Swift.String, name: Swift.String, armStatus: Swift.String)
+  public var reason: Swift.String?
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(id: Swift.String, name: Swift.String, armStatus: Swift.String, reason: Swift.String? = nil)
+  #endif
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -2660,6 +3036,7 @@ public struct AddressModel : Swift.Codable {
 public enum ProductType : Swift.String {
   case homeSecurity
   case bird
+  case pet
   #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.String)
   #endif
@@ -2679,15 +3056,30 @@ public enum GraceType : Swift.String {
     get
   }
 }
+public enum SkuCategory : Swift.String {
+  case ai
+  case combo
+  case data
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.String)
+  #endif
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
 public struct SubscriptionDetails : Swift.Codable {
   public var id: Swift.String
   public var skuId: Swift.String
   public var devices: [Swift.String]
   public var skuName: Swift.String
+  public var skuCategory: Swift.String?
   public var supportedFeatures: [IVSDK.SubscriptionFeature]
   public var productId: Swift.String
   public var subscriptionType: Swift.String
-  public init(id: Swift.String, skuId: Swift.String, devices: [Swift.String], skuName: Swift.String, supportedFeatures: [IVSDK.SubscriptionFeature], productId: Swift.String, subscriptionType: Swift.String)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(id: Swift.String, skuId: Swift.String, devices: [Swift.String], skuName: Swift.String, skuCategory: Swift.String?, supportedFeatures: [IVSDK.SubscriptionFeature], productId: Swift.String, subscriptionType: Swift.String)
+  #endif
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -2711,6 +3103,11 @@ public struct SpaceModel : Swift.Codable {
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
   public var birdPlan: IVSDK.SubscriptionDetails? {
+    get
+  }
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public var petPlan: IVSDK.SubscriptionDetails? {
     get
   }
   #endif
@@ -2863,6 +3260,7 @@ public struct SubscriptionDataModel : Swift.Codable {
   public var skuName: Swift.String
   public var spaceId: Swift.String
   public var skuId: Swift.String
+  public var skuCategory: Swift.String?
   public var startDate: Swift.Int?
   public var trialStartDate: Swift.Int?
   public var subscribeStatus: Swift.String?
@@ -2870,7 +3268,7 @@ public struct SubscriptionDataModel : Swift.Codable {
   public var endDate: Swift.Int64?
   public var productId: Swift.String
   #if compiler(>=5.3) && $NonescapableTypes
-  public init(subscriptionCycle: Swift.Int, nextBillAmount: Swift.Int, nextBillingDate: Swift.Int64?, currency: Swift.String, supportedFeatures: [IVSDK.SubscriptionFeature], devices: [IVSDK.SubscriptionDevice]?, nextBillingCycleSku: IVSDK.NextBillingCycleSku?, id: Swift.String, trial: Swift.Bool, skuName: Swift.String, spaceId: Swift.String, skuId: Swift.String, startDate: Swift.Int?, trailStartDate: Swift.Int?, endDate: Swift.Int64?, productId: Swift.String)
+  public init(subscriptionCycle: Swift.Int, nextBillAmount: Swift.Int, nextBillingDate: Swift.Int64?, currency: Swift.String, supportedFeatures: [IVSDK.SubscriptionFeature], devices: [IVSDK.SubscriptionDevice]?, nextBillingCycleSku: IVSDK.NextBillingCycleSku?, id: Swift.String, trial: Swift.Bool, skuName: Swift.String, spaceId: Swift.String, skuId: Swift.String, skuCategory: Swift.String?, startDate: Swift.Int?, trailStartDate: Swift.Int?, endDate: Swift.Int64?, productId: Swift.String)
   #endif
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
@@ -2937,12 +3335,14 @@ public enum SubscribeStatus : Swift.String, Swift.Codable {
 }
 public struct SubscriptionPricePreviewResponse : Swift.Codable {
   public var id: Swift.String
+  public var name: Swift.String
+  public var category: Swift.String
   public var level: Swift.Int
   public var prices: [IVSDK.SubscriptionPrice]
   public var subscriptionCycle: Swift.Int
   public var supportedFeatures: [IVSDK.SubscriptionFeatures]
   public var productId: Swift.String
-  public init(id: Swift.String, level: Swift.Int, prices: [IVSDK.SubscriptionPrice], subscriptionCycle: Swift.Int, supportedFeatures: [IVSDK.SubscriptionFeatures], productId: Swift.String)
+  public init(id: Swift.String, name: Swift.String, category: Swift.String, level: Swift.Int, prices: [IVSDK.SubscriptionPrice], subscriptionCycle: Swift.Int, supportedFeatures: [IVSDK.SubscriptionFeatures], productId: Swift.String)
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
@@ -3030,27 +3430,6 @@ public struct WifiDetails : Swift.Codable {
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
-public enum NetworkActivityLoggerLevel {
-  case off
-  case debug
-  case info
-  case warn
-  case error
-  case fatal
-  public static func == (a: IVSDK.NetworkActivityLoggerLevel, b: IVSDK.NetworkActivityLoggerLevel) -> Swift.Bool
-  public func hash(into hasher: inout Swift.Hasher)
-  public var hashValue: Swift.Int {
-    get
-  }
-}
-@_hasMissingDesignatedInitializers public class NetworkActivityLogger {
-  public static let shared: IVSDK.NetworkActivityLogger
-  public var level: IVSDK.NetworkActivityLoggerLevel
-  public var filterPredicate: Foundation.NSPredicate?
-  @objc deinit
-  public func startLogging()
-  public func stopLogging()
-}
 public enum EndpointName : Swift.String {
   case external
   case event
@@ -3132,6 +3511,17 @@ public enum EndpointName : Swift.String {
   case getGraceSubscription
   case nvrDevices
   case eventAiFeedback
+  case createTwoWayCallEvent
+  case updateTwoWayCallStatus
+  case logUploadUrl
+  case pets
+  case fetchPetImagesUploadUrl
+  case attachImages
+  case detachImages
+  case validateSim
+  case poolData
+  case operatorsList
+  case dataPass
   #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.String)
   #endif
@@ -3163,10 +3553,12 @@ public enum QueryItemKey : Swift.String {
   case includeToken
   case country
   case productIds
+  case skuCategories
   case date
   case filter
   case productId
   case query
+  case fileName
   #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.String)
   #endif
@@ -3231,6 +3623,9 @@ public protocol DeviceServiceContract {
   func updateDeviceTimelapseSettings(spaceId: Swift.String, deviceId: Swift.String, wakeup: Swift.Bool, request: IVSDK.TimelapseSettingsRequest?) -> IVSDK.IVPublisher<IVSDK.DeviceCloudSettings>
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
+  func updateOTAScheduleSettings(spaceId: Swift.String, deviceId: Swift.String, wakeup: Swift.Bool, request: IVSDK.OTASchedule?) -> IVSDK.IVPublisher<IVSDK.DeviceCloudSettings>
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   func updateDevice(spaceId: Swift.String, deviceId: Swift.String, request: IVSDK.UpdateDeviceRequest?) -> IVSDK.IVPublisher<IVSDK.DeviceModel>
   #endif
   func deleteDevice(spaceId: Swift.String, deviceId: Swift.String, wakeup: Swift.Bool) -> IVSDK.IVPublisher<Swift.Void>
@@ -3251,6 +3646,14 @@ public protocol DeviceServiceContract {
   func updateDeviceClustersAttribute(spaceId: Swift.String, deviceId: Swift.String, clusterId: Swift.String, attributeId: Swift.String, wakeup: Swift.Bool, request: IVSDK.UpdateClusterAttributeRequestModel) -> IVSDK.IVPublisher<IVSDK.ClusterUpdateRespModel>
   func updateDeviceCluster(spaceId: Swift.String, deviceId: Swift.String, clusterId: Swift.String, wakeup: Swift.Bool, request: IVSDK.UpdateClusterMultipleAttributeRequestModel) -> IVSDK.IVPublisher<IVSDK.ClusterUpdateRespModel>
   func getProSecurityProfileDevicesActivityZone(spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.ActivityZoneModel>
+  #if compiler(>=5.3) && $NonescapableTypes
+  func createTwoWayCallEvent(spaceId: Swift.String, deviceId: Swift.String, request: IVSDK.TwoWayCallEventRequest?) -> IVSDK.IVPublisher<IVSDK.TwoWayCallEventModel>
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  func updateTwoWayCallStatus(spaceId: Swift.String, deviceId: Swift.String, callId: Swift.String, request: IVSDK.TwoWayCallStatusRequest?) -> IVSDK.IVPublisher<Swift.Void>
+  #endif
+  func getOperatorsList(spaceId: Swift.String, providerId: Swift.String, iccid: Swift.String) -> IVSDK.IVPublisher<IVSDK.OperatorsListModel>
+  func updateDeviceOperator(spaceId: Swift.String, deviceId: Swift.String, operatorValue: Swift.String, wakeup: Swift.Bool) -> IVSDK.IVPublisher<IVSDK.DeviceModel>
 }
 public protocol FaceServiceContract {
   func getFaces(spaceId: Swift.String, queryItems: [IVSDK.QueryItem]) -> IVSDK.IVPublisher<IVSDK.FaceListModel>
@@ -3259,6 +3662,22 @@ public protocol FaceServiceContract {
   func deleteFace(spaceId: Swift.String, faceId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
   func uploadFaceImage(folderPath: Swift.String, name: Swift.String, data: Foundation.Data, url: Swift.String, authToken: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
   func updateSpaceFeature(spaceId: Swift.String, request: IVSDK.UpdateSpaceFeatureRequest) -> IVSDK.IVPublisher<Swift.Void>
+}
+public protocol PetServiceContract {
+  func createPetProfile(spaceId: Swift.String, request: IVSDK.CreatePetProfileRequest) -> IVSDK.IVPublisher<IVSDK.PetProfile>
+  func listPetProfiles(spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.ListPetProfilesResponse>
+  func getPetProfile(spaceId: Swift.String, petId: Swift.String) -> IVSDK.IVPublisher<IVSDK.PetProfileDetail>
+  func updatePetProfile(spaceId: Swift.String, petId: Swift.String, request: IVSDK.UpdatePetProfileRequest) -> IVSDK.IVPublisher<IVSDK.PetProfile>
+  func deleteProfileImage(spaceId: Swift.String, petId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
+  func deletePetProfile(spaceId: Swift.String, petId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
+  #if compiler(>=5.3) && $NonescapableTypes
+  func getPetImageUploadURL(spaceId: Swift.String, limit: Swift.Int?) -> IVSDK.IVPublisher<IVSDK.GetUploadUrlResponse>
+  #endif
+  func uploadImage(spaceId: Swift.String, name: Swift.String, data: Foundation.Data, url: Swift.String, authToken: Swift.String, petId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
+  func attachPetImages(spaceId: Swift.String, petId: Swift.String, request: IVSDK.AttachPetImagesRequest) -> IVSDK.IVPublisher<IVSDK.PetProfileDetail>
+  func detachPetImages(spaceId: Swift.String, petId: Swift.String, request: IVSDK.DetachPetImagesRequest) -> IVSDK.IVPublisher<IVSDK.PetProfileDetail>
+  func getRecommendedPetImages(spaceId: Swift.String, petId: Swift.String) -> IVSDK.IVPublisher<IVSDK.RecommendedPet>
+  func updatePetImagesFeedback(spaceId: Swift.String, petId: Swift.String, request: IVSDK.PetImagesFeedbackRequest) -> IVSDK.IVPublisher<Swift.Void>
 }
 public protocol ProMonitoringServiceContract {
   func getProfile(spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.ProMonitoringModel>
@@ -3328,6 +3747,9 @@ public protocol SpaceServiceContract {
   func getGraceSubscription(spaceId: Swift.String) -> IVSDK.IVPublisher<[IVSDK.GraceSubscriptionModel]>
   func setEventFeedback(eventId: Swift.String, spaceId: Swift.String, request: IVSDK.EventFeedbackRequest) -> IVSDK.IVPublisher<Swift.Void>
   func searchEvents(spaceId: Swift.String, searchQuery: Swift.String) -> IVSDK.IVPublisher<IVSDK.SearchEventsIdsModel>
+  func validateSim(spaceId: Swift.String, iccid: Swift.String) -> IVSDK.IVPublisher<IVSDK.ValidateSimModel>
+  func getPoolData(spaceId: Swift.String) -> IVSDK.IVPublisher<IVSDK.PoolDataModel>
+  func getDataPassInfo(spaceId: Swift.String) -> IVSDK.IVPublisher<[IVSDK.DataPassModel]>
 }
 public protocol SubscriptionServiceContract {
   func getSubscriptions(spaceId: Swift.String) -> IVSDK.IVPublisher<[IVSDK.SubscriptionDataModel]>
@@ -3335,7 +3757,7 @@ public protocol SubscriptionServiceContract {
   func checkFreeTrail(productId: Swift.String) -> IVSDK.IVPublisher<IVSDK.FreeTrialResponse>
   func cancelSubscription(subscriptionId: Swift.String) -> IVSDK.IVPublisher<Swift.Void>
   func activateSubscriptionPreview(spaceId: Swift.String, request: IVSDK.SubscriptionPreviewRequest) -> IVSDK.IVPublisher<Swift.Void>
-  func getSubscriptionPrices(country: Swift.String, productIds: [Swift.String]) -> IVSDK.IVPublisher<[IVSDK.SubscriptionPricePreviewResponse]>
+  func getSubscriptionPrices(country: Swift.String, productIds: [Swift.String], skuCategories: IVSDK.SkuCategory) -> IVSDK.IVPublisher<[IVSDK.SubscriptionPricePreviewResponse]>
 }
 public protocol SystemServiceContract {
   func ping() -> IVSDK.IVPublisher<Swift.Void>
@@ -3390,15 +3812,6 @@ public protocol UserServiceContract {
   func signupWithApple(languageCode: Swift.String) -> IVSDK.IVPublisher<IVSDK.UserModel>
   func getFirebaseToken(needRefresh: Swift.Bool) -> IVSDK.IVPublisher<Swift.String>
 }
-@_hasMissingDesignatedInitializers public class CodableUtils {
-  #if compiler(>=5.3) && $NonescapableTypes
-  public static func encode<T>(_ object: T) -> Swift.String? where T : Swift.Encodable
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
-  public static func decode<T>(_ jsonString: Swift.String, as objectType: T.Type) -> T? where T : Swift.Decodable
-  #endif
-  @objc deinit
-}
 @_hasMissingDesignatedInitializers public class QRCodeGenerator {
   #if compiler(>=5.3) && $NonescapableTypes
   public static func generateQRCode(from dict: [Swift.String : Swift.String]) -> UIKit.UIImage?
@@ -3421,6 +3834,7 @@ extension Swift.String {
   public static let subscriptionService: any IVSDK.SubscriptionServiceContract
   public static let proMonitoringService: any IVSDK.ProMonitoringServiceContract
   public static let faceService: any IVSDK.FaceServiceContract
+  public static let petService: any IVSDK.PetServiceContract
   @objc deinit
 }
 extension Foundation.NSNotification.Name {
@@ -3510,7 +3924,7 @@ public struct APIError : Swift.Decodable, Foundation.LocalizedError {
   @_Concurrency.MainActor @preconcurrency public func captureSnapshot(size: CoreFoundation.CGSize?, snapshot: @escaping (UIKit.UIImage?) -> ())
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
-  @_Concurrency.MainActor @preconcurrency public func stopRecording(completion: @escaping (_ recordingUrl: Foundation.URL?) -> Swift.Void)
+  @_Concurrency.MainActor @preconcurrency public func stopRecording(_ completion: @escaping (Swift.Result<Swift.String, any Swift.Error>) -> Swift.Void)
   #endif
   @objc deinit
 }
@@ -3563,6 +3977,9 @@ extension IVSDK.PlaybackAction : Swift.RawRepresentable {}
 extension IVSDK.WakeupMessage.Action : Swift.Equatable {}
 extension IVSDK.WakeupMessage.Action : Swift.Hashable {}
 extension IVSDK.WakeupMessage.Action : Swift.RawRepresentable {}
+extension IVSDK.TwoWayCallMessage.Action : Swift.Equatable {}
+extension IVSDK.TwoWayCallMessage.Action : Swift.Hashable {}
+extension IVSDK.TwoWayCallMessage.Action : Swift.RawRepresentable {}
 extension IVSDK.ManualSirenMessage.Action : Swift.Equatable {}
 extension IVSDK.ManualSirenMessage.Action : Swift.Hashable {}
 extension IVSDK.ManualSirenMessage.Action : Swift.RawRepresentable {}
@@ -3597,6 +4014,10 @@ extension IVSDK.DeviceAuthStatus : Swift.RawRepresentable {}
 extension IVSDK.DeviceState : Swift.Equatable {}
 extension IVSDK.DeviceState : Swift.Hashable {}
 extension IVSDK.DeviceState : Swift.RawRepresentable {}
+extension IVSDK.DeviceConnectionState : Swift.Equatable {}
+extension IVSDK.DeviceConnectionState : Swift.Hashable {}
+extension IVSDK.DeviceConnectionState : Swift.RawRepresentable {}
+extension IVSDK.DoorbellChimeType : Swift.RawRepresentable {}
 extension IVSDK.NightVisionMode : Swift.RawRepresentable {}
 extension IVSDK.SpotLightMode : Swift.RawRepresentable {}
 extension IVSDK.GuideLightMode : Swift.RawRepresentable {}
@@ -3625,6 +4046,18 @@ extension IVSDK.MotionZoneType : Swift.RawRepresentable {}
 extension IVSDK.EventTag : Swift.Equatable {}
 extension IVSDK.EventTag : Swift.Hashable {}
 extension IVSDK.EventTag : Swift.RawRepresentable {}
+extension IVSDK.PetActivity : Swift.Equatable {}
+extension IVSDK.PetActivity : Swift.Hashable {}
+extension IVSDK.PetActivity : Swift.RawRepresentable {}
+extension IVSDK.DataPassStatus : Swift.Equatable {}
+extension IVSDK.DataPassStatus : Swift.Hashable {}
+extension IVSDK.DataPassStatus : Swift.RawRepresentable {}
+extension IVSDK.PurchaseType : Swift.Equatable {}
+extension IVSDK.PurchaseType : Swift.Hashable {}
+extension IVSDK.PurchaseType : Swift.RawRepresentable {}
+extension IVSDK.PetType : Swift.Equatable {}
+extension IVSDK.PetType : Swift.Hashable {}
+extension IVSDK.PetType : Swift.RawRepresentable {}
 extension IVSDK.ProMonitoringDeviceState : Swift.Equatable {}
 extension IVSDK.ProMonitoringDeviceState : Swift.Hashable {}
 extension IVSDK.ProMonitoringDeviceState : Swift.RawRepresentable {}
@@ -3643,6 +4076,9 @@ extension IVSDK.ProductType : Swift.RawRepresentable {}
 extension IVSDK.GraceType : Swift.Equatable {}
 extension IVSDK.GraceType : Swift.Hashable {}
 extension IVSDK.GraceType : Swift.RawRepresentable {}
+extension IVSDK.SkuCategory : Swift.Equatable {}
+extension IVSDK.SkuCategory : Swift.Hashable {}
+extension IVSDK.SkuCategory : Swift.RawRepresentable {}
 extension IVSDK.BirdImageTag : Swift.Equatable {}
 extension IVSDK.BirdImageTag : Swift.Hashable {}
 extension IVSDK.BirdImageTag : Swift.RawRepresentable {}
@@ -3652,8 +4088,6 @@ extension IVSDK.SubscriptionType : Swift.RawRepresentable {}
 extension IVSDK.SubscribeStatus : Swift.Equatable {}
 extension IVSDK.SubscribeStatus : Swift.Hashable {}
 extension IVSDK.SubscribeStatus : Swift.RawRepresentable {}
-extension IVSDK.NetworkActivityLoggerLevel : Swift.Equatable {}
-extension IVSDK.NetworkActivityLoggerLevel : Swift.Hashable {}
 extension IVSDK.EndpointName : Swift.Equatable {}
 extension IVSDK.EndpointName : Swift.Hashable {}
 extension IVSDK.EndpointName : Swift.RawRepresentable {}

@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.platform     = :ios, '15.0'
 
   # Use the framework
-  s.vendored_frameworks = ['Framework/IVSDK-iOS.xcframework/IVSDK.xcframework', 'Framework/IVSDK-iOS.xcframework/WebRTC.xcframework']
+  s.vendored_frameworks = ['Framework/IVSDK-iOS.xcframework/IVSDK.xcframework', 'Framework/IVSDK-iOS.xcframework/IVWebRTC.xcframework']
 
   s.requires_arc = true
   # Add dependencies
