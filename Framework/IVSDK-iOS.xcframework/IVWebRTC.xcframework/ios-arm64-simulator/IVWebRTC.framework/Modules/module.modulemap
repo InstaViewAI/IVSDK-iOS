@@ -1,0 +1,6 @@
+framework module IVWebRTC {
+  umbrella header "IVWebRTC.h"
+
+  export *
+  module * { export * }
+}
