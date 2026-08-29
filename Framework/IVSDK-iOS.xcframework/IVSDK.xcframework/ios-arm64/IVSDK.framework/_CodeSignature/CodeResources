@@ -10,27 +10,27 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		8jsUVdr6oWunC0FlWjlUspshz8U=
+		ZHwgnZgiP7kJzFTGtP+xGsz1Vz8=
 		</data>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.abi.json</key>
 		<data>
-		kA1ZNjqz29wtq4StTshDuzWVaRE=
+		+NRpm9fJsnZlp/z//wANYoRFC+o=
 		</data>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<data>
-		B1n9tgi2IhrCImdQJG17yIBN4pI=
+		pHzHWxWWAar0lF4mm1FH2nyTTk8=
 		</data>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<data>
-		qIKuUYhzk5OGYW3/3RnizlGH++M=
+		p/lLjxr54wU0veOGC/7Z/xbghr8=
 		</data>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<data>
-		B1n9tgi2IhrCImdQJG17yIBN4pI=
+		pHzHWxWWAar0lF4mm1FH2nyTTk8=
 		</data>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		kUc28heZOgEBKu1yau9ihKAU9jA=
+		TJWM3/YcbfUKDJHee+iQ45IEG/w=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -50,35 +50,35 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			AvwzXKSdGRr3MEan4nlpd5AOoXzAhCaABCrm7/QnfMU=
+			aLru9PvM/m/6VsCKNHdt5uIAt34DfLKeL7bmwfQOo+g=
 			</data>
 		</dict>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			eR6L6hdBWNpS/C+GD+4YHAxWke+69YD79RB4JGWwFTY=
+			7zdLJVppqfDIPLi5ex/LGUyMtvL/RpH7CFGtjeoW7ik=
 			</data>
 		</dict>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			Ne77rWLJEmLIW9+87YczwDf/03RrONCZHd95yWSysEc=
+			SP3TPetX+LwXMSyPlF7ZGc2WE+hS0Nsverw6bi+1pAs=
 			</data>
 		</dict>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			eR6L6hdBWNpS/C+GD+4YHAxWke+69YD79RB4JGWwFTY=
+			7zdLJVppqfDIPLi5ex/LGUyMtvL/RpH7CFGtjeoW7ik=
 			</data>
 		</dict>
 		<key>Modules/IVSDK.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			LPiG2+tEBGEWQTuQNq47ADcA3RgmbV/dLubC7XY/Aq4=
+			aEU5XNsPe44UjvVQVS1Caf2LJs5zjjlJCPusII/xnGM=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

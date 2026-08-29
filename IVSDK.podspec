@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'IVSDK'
-  s.version      = '3.0.0'
+  s.version      = '3.0.1'
   s.summary      = 'InstaVision iOS SDK.'
   s.description  = 'IVSDK is a networking and live streaming framework, likely designed to handle real-time video transmission, low-latency streaming, and network communication with InstaVision cloud'
   s.homepage     = 'https://instavision.shop'
