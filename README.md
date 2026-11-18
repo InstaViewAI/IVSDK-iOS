@@ -13,10 +13,10 @@ In Xcode: File, Add Package Dependencies, paste `https://github.com/InstaViewAI/
 In a `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/InstaViewAI/IVSDK-iOS.git", from: "3.1.0")
+.package(url: "https://github.com/InstaViewAI/IVSDK-iOS.git", from: "3.1.1")
 ```
 
-The package downloads `IVSDK.xcframework.zip` and `IVWebRTC.xcframework.zip` from the GitHub release of the chosen version and verifies them against the checksums in `Package.swift`. Alamofire, Starscream, FirebaseAuth, GoogleSignIn and ZIPFoundation are declared as package dependencies, so an app that already uses them gets one copy.
+The package downloads `IVSDK.xcframework.zip` and `IVWebRTC.xcframework.zip` from the GitHub release of the chosen version and verifies them against the checksums in `Package.swift`. Alamofire, Starscream, FirebaseAuth, GoogleSignIn and ZIPFoundation are package dependencies of the `IVSDK` product, so Swift Package Manager adds them for you and an app that already uses them keeps one copy.
 
 ### CocoaPods
 
@@ -24,5 +24,5 @@ The package downloads `IVSDK.xcframework.zip` and `IVWebRTC.xcframework.zip` fro
 platform :ios, '15.0'
 use_frameworks!
 
-pod 'IVSDK', :git => 'https://github.com/InstaViewAI/IVSDK-iOS.git', :tag => '3.1.0'
+pod 'IVSDK', :git => 'https://github.com/InstaViewAI/IVSDK-iOS.git', :tag => '3.1.1'
 ```
